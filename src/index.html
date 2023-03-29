@@ -21,17 +21,20 @@
             </li>
             <li>
               <button class="shadow-xl rounded-full p-2 w-11 h-11">
-                <i class="fa-solid fa-earth-americas"></i>
+                <i class="fa-solid fa-heart"></i>
               </button>
             </li>
           </ul>
         </div>
         <div class="col-span-5 flex flex-col m-5 shadow-md rounded" data-root="home">
-          <form class="max-w-md mx-auto" data-form="search">
+          <form class="max-w-sm w-full mx-auto" data-form="search">
             <div
-              class="flex items-center w-full h-12 rounded-lg shadow-md focus-within:shadow-lg bg-white overflow-hidden"
+              class="flex items-center gap-3 w-full h-12 rounded-lg shadow-md focus-within:shadow-lg bg-white overflow-hidden p-3"
             >
-              <label class="grid place-items-center h-full w-12 text-gray-300" for="search-input">
+              <label
+                class="grid place-items-center h-full w-12 text-gray-300 w-fit h-fit"
+                for="search-input"
+              >
                 <i class="fa-solid fa-magnifying-glass text-amber-600"></i>
               </label>
               <input
@@ -43,10 +46,13 @@
                 placeholder="Weather in..."
                 data-input="search"
               />
+              <button type="button">
+                <i class="fa-solid fa-location-crosshairs text-lg text-slate-700"></i>
+              </button>
             </div>
           </form>
         </div>
-        <div class="col-span-2"></div>
+        <div class="col-span-2" data-root="sidebar"></div>
       </div>
     </div>
 

@@ -1,5 +1,6 @@
 import { append, getEl } from '../utils/helpers';
-import defaultView from './View.default';
+// import Default from './View.default';
+import Results from './View.results';
 
 export default class Home {
   constructor(root) {
@@ -7,6 +8,11 @@ export default class Home {
     this.input = getEl(this.parent, '[data-input="search"]');
     this.form = getEl(this.parent, '[data-form="search"]');
   }
+
+  removeLastChild = () => {
+    this.parent.removeChild(this.parent.lastElementChild);
+    return this;
+  };
 
   bindFormSubmit = callback => {
     this.form.addEventListener('submit', event => {
@@ -28,6 +34,9 @@ export default class Home {
   };
 
   render = data => {
-    if (!data) append(this.parent, defaultView());
+    append(this.parent, Results(data));
+    // if (data) {
+    //   append(this.parent, Results());
+    // } else append(this.parent, Default());
   };
 }

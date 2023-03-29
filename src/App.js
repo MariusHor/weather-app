@@ -1,10 +1,14 @@
 import Home from './views/View.home';
+import Sidebar from './views/View.sidebar';
 import Model from './Model';
+
 import './App.scss';
 
 export default class App {
   constructor(root) {
     this.home = new Home(root);
+    this.sidebar = new Sidebar(root);
+
     this.model = new Model();
   }
 
@@ -12,6 +16,11 @@ export default class App {
     try {
       await this.model.getCoords(input);
       await this.model.getWeatherInfo();
+
+      this.home.removeLastChild().render(this.model.state.currentSearch);
+      this.sidebar.removeLastChild().render(this.model.state.currentSearch);
+
+      this.model.saveHistory();
     } catch (error) {
       console.log(error);
     }
@@ -23,9 +32,11 @@ export default class App {
   };
 
   mount() {
-    const { home, initListeners } = this;
+    const { home, sidebar, initListeners } = this;
 
     home.render();
+    sidebar.render();
+
     initListeners();
   }
 }

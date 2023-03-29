@@ -26,7 +26,7 @@ export default class Model {
     );
     const data = await response.json();
 
-    this.saveCurrentSearch({ data }).saveHistory();
+    this.saveCurrentSearch({ data });
   };
 
   saveCurrentSearch = payload => {

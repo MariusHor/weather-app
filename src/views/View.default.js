@@ -1,6 +1,6 @@
 import homeDefault from '../constants/images';
 
-const defaultView = () => `
+const Default = () => `
         <div class="h-full flex flex-col items-center justify-center gap-10 p-4">
             <h1 class="text-xl font-extrabold">What will the weather be like? 
                 <button class="text-amber-600" data-button="focus">Find out</button>!
@@ -9,4 +9,4 @@ const defaultView = () => `
         </div>
     `;
 
-export default defaultView;
+export default Default;
