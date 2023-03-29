@@ -1,7 +1,11 @@
 import './App.scss';
 
 export default class App {
-  mount(parent) {
-    console.log(parent);
+  constructor(root) {
+    this.root = root;
+  }
+
+  mount() {
+    console.log(this.root);
   }
 }
