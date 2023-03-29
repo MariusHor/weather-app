@@ -26,8 +26,8 @@
             </li>
           </ul>
         </div>
-        <div class="col-span-5 flex m-5 shadow-md rounded">
-          <form class="max-w-md mx-auto">
+        <div class="col-span-5 flex flex-col m-5 shadow-md rounded" data-root="home">
+          <form class="max-w-md mx-auto" data-form="search">
             <div
               class="flex items-center w-full h-12 rounded-lg shadow-md focus-within:shadow-lg bg-white overflow-hidden"
             >
@@ -41,6 +41,7 @@
                 name="search-input"
                 id="search-input"
                 placeholder="Weather in..."
+                data-input="search"
               />
             </div>
           </form>
