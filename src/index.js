@@ -4,5 +4,5 @@ import './index.css';
 
 const root = document.querySelector('#root');
 
-const app = new App();
-app.mount(root);
+const app = new App(root);
+app.mount();
