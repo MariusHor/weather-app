@@ -6,8 +6,8 @@ export const append = (parent, content) => {
 
 export const getEl = (parent, selector) => parent.querySelector(selector);
 
-export const formatTime = (unixTimestamp, timezoneOffset) =>
-  moment.utc(unixTimestamp, 'X').add(timezoneOffset, 'seconds').format('h:mm A');
+export const formatTime = (unixTimestamp, timezoneOffset = 0, timeFormat = 'h:mm A') =>
+  moment.utc(unixTimestamp, 'X').add(timezoneOffset, 'seconds').format(timeFormat);
 
 export const round = number => Math.round(number);
 

@@ -1,18 +1,13 @@
 import ForecastCard from './Card.forecast';
-import SwitchInput from './Input.switch';
 
-const ForecastPanel = () => ` 
-        <div class="flex flex-col items-center justify-center gap-6 p-4 text-slate-200">
-            <div class="flex gap-4">
-                <h3>hourly</h3>
-                ${SwitchInput()}
-                <h3>7 day</h3>
+const ForecastPanel = payload => ` 
+        <div class="flex flex-col items-center justify-center gap-6 text-slate-200">
+            <div class="flex flex-col gap-1 items-center">
+                <h3 class="text-2xl">Forecast</h3>
+                <h5 class="text-slate-500 w-fit">24 hour</h5>
             </div>
             <div class="w-full flex flex-col items-center justify-center gap-1">
-                ${ForecastCard()}
-                ${ForecastCard()}
-                ${ForecastCard()}
-                ${ForecastCard()}
+                ${payload.map(item => ForecastCard(item)).join('')}
             </div>
         </div>
     `;

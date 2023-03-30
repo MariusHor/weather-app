@@ -13,7 +13,6 @@ export default class Sidebar {
   };
 
   render = data => {
-    console.log(data);
     if (data) {
       append(this.parent, ForecastPanel(data));
     } else append(this.parent, DefaultSidebar());

@@ -28,7 +28,7 @@ export default class Model {
     ];
 
     await fetchMultiple(urls).then(data => {
-      this.saveCurrentSearch({ currentWeather: data[0], forecast: data[1] });
+      this.saveCurrentSearch({ currentWeather: data[0], forecast: data[1].list.slice(0, 8) });
     });
   };
 
