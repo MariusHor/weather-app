@@ -13,7 +13,16 @@ export const round = number => Math.round(number);
 
 export const fetchMultiple = async urls => {
   try {
-    const responses = await Promise.all(urls.map(url => fetch(url)));
+    const responses = await Promise.all(
+      urls.map(url =>
+        fetch(url, {
+          cache: 'force-cache',
+          headers: {
+            'Cache-Control': 'public, max-age=600',
+          },
+        }),
+      ),
+    );
     const data = await Promise.all(responses.map(response => response.json()));
     return data;
   } catch (error) {

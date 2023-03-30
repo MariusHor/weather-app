@@ -15,24 +15,22 @@ const Results = payload => {
   };
 
   return `
-    <div>
-        <div class="h-full flex items-center justify-center gap-10 p-4">
-            <div class="h-full w-full rounded-lg">
-                ${WeatherInfoCard(weatherData)}
-            </div>
-            <div class="flex flex-col  gap-2 h-full w-full rounded-lg text-slate-200 font-bold text-lg">
-                ${SunInfoCard('sunrise', {
-                  seconds: payload.sys.sunrise,
-                  timezone: payload.timezone,
-                })}
-                ${SunInfoCard('sunset', {
-                  seconds: payload.sys.sunset,
-                  timezone: payload.timezone,
-                })}
-        </div>
-    </div>
-        <div class="h-full flex flex-col items-center justify-center gap-10 p-4">
-        </div>
+    <div class="h-full w-full flex items-center justify-center">
+      <div class="h-full w-full flex items-center justify-center gap-10 p-4 max-h-80">
+          <div class="h-full w-full rounded-lg">
+              ${WeatherInfoCard(weatherData)}
+          </div>
+          <div class="flex flex-col gap-2 h-full w-full rounded-lg text-slate-200 font-bold text-lg">
+              ${SunInfoCard('sunrise', {
+                seconds: payload.sys.sunrise,
+                timezone: payload.timezone,
+              })}
+              ${SunInfoCard('sunset', {
+                seconds: payload.sys.sunset,
+                timezone: payload.timezone,
+              })}
+          </div>
+      </div>
     </div>
 `;
 };

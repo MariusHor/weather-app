@@ -12,6 +12,16 @@ export default class Sidebar {
     return this;
   };
 
+  bindFocusBtnClick = callback => {
+    this.parent.addEventListener('click', event => {
+      const focusBtn = event.target.closest('[data-button="focus"]');
+      if (!focusBtn) return;
+
+      callback();
+    });
+    return this;
+  };
+
   render = data => {
     if (data) {
       append(this.parent, ForecastPanel(data));

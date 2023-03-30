@@ -1,11 +1,7 @@
-import homeDefaultBg from '../constants/images';
-
 const DefaultHome = () => `
-        <div class="h-full flex flex-col items-center text-slate-200 justify-center gap-10 p-4">
-            <h1 class="text-2xl font-extrabold">What will the weather be like? 
-                <button class="text-amber-600" data-button="focus">Find out</button>!
-            </h1>
-            <img src=${homeDefaultBg} />
+        <div class="map-container w-fit h-full flex items-center overflow-hidden">
+            <div id="map" class="map overflow-hidden shadow-md rounded">
+            </div>
         </div>
     `;
 

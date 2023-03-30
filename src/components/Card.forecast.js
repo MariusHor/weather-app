@@ -11,7 +11,7 @@ const ForecastCard = payload => {
     <div class="overlay grid grid-cols-3 justify-items-center items-center h-full w-full p-3 shadow-md">
         <img src=${iconUrl} width="45px" height="45px" />
         <h2 class="text-2xl">${round(payload.main.temp)}<span>&#176;</span></h2>
-        <div class="text-end h-fit w-full text-sm">
+        <div class="text-end h-fit w-full text-xs">
             <p class="text-slate-500">${day}</p>
             <p>${hours}</p>
         </div>

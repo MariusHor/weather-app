@@ -5,7 +5,7 @@ const WeatherInfoCard = payload => {
   const weatherIconSrc = `https://openweathermap.org/img/wn/${payload.weather.icon}@2x.png`;
 
   return `
-        <div class="overlay grid flex-col h-full w-full shadow-xl rounded-lg text-slate-100 p-5 text-xs">  
+        <div class="overlay grid flex-col gap-6 w-full shadow-xl rounded-lg text-slate-100 p-5 text-xs">  
             <div class="flex justify-between">
                 <div class="flex gap-2 h-fit items-center">
                     <i class="fa-solid fa-location-dot"></i>  
