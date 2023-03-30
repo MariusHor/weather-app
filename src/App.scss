@@ -2,6 +2,8 @@
 
 body {
   font-family: 'Secular One', sans-serif;
+  background-image: url('./assets/main-bg.jpg');
+  background-size: cover;
 }
 
 .sunrise {
@@ -19,6 +21,14 @@ body {
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.app {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: rgba(0, 27, 61, 0.7);
+}
+
+.active {
+  color: white;
 }

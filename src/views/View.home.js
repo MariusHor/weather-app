@@ -1,6 +1,6 @@
 import { append, getEl } from '../utils/helpers';
-// import Default from './View.default';
-import Results from './View.results';
+import DefaultHome from '../components/Section.defaultHome';
+import Results from '../components/Section.results';
 
 export default class Home {
   constructor(root) {
@@ -33,10 +33,9 @@ export default class Home {
     });
   };
 
-  render = data => {
-    append(this.parent, Results(data));
-    // if (data) {
-    //   append(this.parent, Results());
-    // } else append(this.parent, Default());
+  render = payload => {
+    if (payload) {
+      append(this.parent, Results(payload));
+    } else append(this.parent, DefaultHome());
   };
 }

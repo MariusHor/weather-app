@@ -17,8 +17,8 @@ export default class App {
       await this.model.getCoords(input);
       await this.model.getWeatherInfo();
 
-      this.home.removeLastChild().render(this.model.state.currentSearch);
-      this.sidebar.removeLastChild().render(this.model.state.currentSearch);
+      this.home.removeLastChild().render(this.model.state.currentSearch.currentWeather);
+      this.sidebar.removeLastChild().render(this.model.state.currentSearch.forecast);
 
       this.model.saveHistory();
     } catch (error) {

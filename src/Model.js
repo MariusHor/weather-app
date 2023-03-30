@@ -1,4 +1,5 @@
-import WEATHER_API_URL from './constants/constants';
+import WEATHER_API_URI from './constants/constants';
+import { fetchMultiple } from './utils/helpers';
 
 export default class Model {
   constructor() {
@@ -10,7 +11,7 @@ export default class Model {
 
   getCoords = async input => {
     const response = await fetch(
-      `${WEATHER_API_URL}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`,
+      `${WEATHER_API_URI}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`,
     );
     const data = await response.json();
     const { lat, lon } = data[0];
@@ -21,12 +22,14 @@ export default class Model {
   getWeatherInfo = async () => {
     const { lat, lon } = this.state.currentSearch.coords;
 
-    const response = await fetch(
-      `${WEATHER_API_URL}data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_API_KEY}`,
-    );
-    const data = await response.json();
+    const urls = [
+      `${WEATHER_API_URI}data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
+      `${WEATHER_API_URI}data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
+    ];
 
-    this.saveCurrentSearch({ data });
+    await fetchMultiple(urls).then(data => {
+      this.saveCurrentSearch({ currentWeather: data[0], forecast: data[1] });
+    });
   };
 
   saveCurrentSearch = payload => {

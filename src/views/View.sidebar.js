@@ -1,5 +1,6 @@
 import { append, getEl } from '../utils/helpers';
-import Forecast from './View.forecast';
+import ForecastPanel from '../components/Section.forecastPanel';
+import DefaultSidebar from '../components/Section.defaultSidebar';
 
 export default class Sidebar {
   constructor(root) {
@@ -12,9 +13,9 @@ export default class Sidebar {
   };
 
   render = data => {
-    append(this.parent, Forecast(data));
-    // if (data) {
-    //   append(this.parent, Results());
-    // } else append(this.parent, Default());
+    console.log(data);
+    if (data) {
+      append(this.parent, ForecastPanel(data));
+    } else append(this.parent, DefaultSidebar());
   };
 }
