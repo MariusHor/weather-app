@@ -1,5 +1,6 @@
 import WeatherInfoCard from './Card.weatherInfo';
 import SunInfoCard from './Card.sunInfo';
+import WeatherMetrics from './Section.weatherMetrics';
 
 const Results = payload => {
   const weatherData = {
@@ -15,7 +16,7 @@ const Results = payload => {
   };
 
   return `
-    <div class="h-full w-full flex items-center justify-center">
+    <div class="h-full w-full flex flex-col items-center justify-center">
       <div class="h-full w-full flex items-center justify-center gap-5 p-4 max-h-80">
           <div class="h-full w-full rounded-lg">
               ${WeatherInfoCard(weatherData)}
@@ -31,6 +32,7 @@ const Results = payload => {
               })}
           </div>
       </div>
+      ${WeatherMetrics(weatherData.weather)}
     </div>
 `;
 };
