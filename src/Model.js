@@ -4,7 +4,7 @@ import { fetchMultiple } from './utils/helpers';
 export default class Model {
   constructor() {
     this.state = {
-      currentSearch: {},
+      currentSearch: null,
       history: [],
     };
   }
@@ -28,9 +28,20 @@ export default class Model {
     ];
 
     await fetchMultiple(urls).then(data => {
-      this.saveCurrentSearch({ currentWeather: data[0], forecast: data[1].list.slice(0, 8) });
+      this.saveCurrentSearch({
+        currentWeather: data[0],
+        forecast: {
+          results: data[1].list.slice(0, 8),
+          timezone: data[1].city.timezone,
+        },
+      });
     });
   };
+
+  getPositionData = () => ({
+    locality: this.state.currentSearch.currentWeather.name,
+    country: this.state.currentSearch.currentWeather.sys.country,
+  });
 
   saveCurrentSearch = payload => {
     this.state = {
@@ -48,7 +59,7 @@ export default class Model {
     this.state = {
       ...this.state,
       history: [...this.state.history, this.state.currentSearch],
-      currentSearch: {},
+      currentSearch: null,
     };
   };
 }

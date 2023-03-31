@@ -16,20 +16,12 @@ export default class App {
     this.geolocation = new Geolocation();
   }
 
-  static async getPositionData(coords) {
-    const { latitude, longitude } = coords;
-
-    const response = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
-    );
-    const positionData = await response.json();
-    return positionData;
-  }
-
   handleFormSubmit = async input => {
     try {
-      await this.model.getCoords(input);
-      await this.model.getWeatherInfo();
+      if (!this.model.state.currentSearch) {
+        await this.model.getCoords(input);
+        await this.model.getWeatherInfo();
+      }
 
       this.home.removeLastChild().render(this.model.state.currentSearch.currentWeather);
       this.sidebar.removeLastChild().render(this.model.state.currentSearch.forecast);
@@ -42,8 +34,21 @@ export default class App {
     }
   };
 
-  handleFocusBtnClick = () => {
-    this.home.focusInput();
+  handleMapClick = async coords => {
+    const { lat, lng } = coords;
+
+    try {
+      this.model.saveCurrentSearch({ coords: { lat, lon: lng } });
+      await this.model.getWeatherInfo();
+
+      const positionData = this.model.getPositionData();
+
+      if (!positionData.locality) return; // Display NOT FOUND message
+
+      this.home.setInputValue(positionData).focusInput();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   handlePositionBtnClick = async () => {
@@ -51,7 +56,12 @@ export default class App {
       await this.geolocation.checkGelocationPermission();
 
       const userPosition = await Geolocation.getUserPosition();
-      const positionData = await App.getPositionData(userPosition.coords);
+
+      const { latitude: lat, longitude: lon } = userPosition.coords;
+      this.model.saveCurrentSearch({ coords: { lat, lon } });
+
+      await this.model.getWeatherInfo();
+      const positionData = this.model.getPositionData();
 
       this.map.loadMap(userPosition);
       this.home.disablePositionBtn().setInputValue(positionData).focusInput();
@@ -60,15 +70,8 @@ export default class App {
     }
   };
 
-  handleMapClick = async coords => {
-    const { lat, lng } = coords;
-
-    try {
-      const positionData = await App.getPositionData({ latitude: lat, longitude: lng });
-      this.home.disablePositionBtn().setInputValue(positionData).focusInput();
-    } catch (error) {
-      console.log(error);
-    }
+  handleFocusBtnClick = () => {
+    this.home.focusInput();
   };
 
   initListeners = () => {

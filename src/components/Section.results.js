@@ -16,7 +16,7 @@ const Results = payload => {
 
   return `
     <div class="h-full w-full flex items-center justify-center">
-      <div class="h-full w-full flex items-center justify-center gap-10 p-4 max-h-80">
+      <div class="h-full w-full flex items-center justify-center gap-5 p-4 max-h-80">
           <div class="h-full w-full rounded-lg">
               ${WeatherInfoCard(weatherData)}
           </div>

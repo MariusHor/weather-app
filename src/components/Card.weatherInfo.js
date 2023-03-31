@@ -6,7 +6,7 @@ const WeatherInfoCard = payload => {
 
   return `
         <div class="overlay grid flex-col gap-6 w-full shadow-xl rounded-lg text-slate-100 p-5 text-xs">  
-            <div class="flex justify-between">
+            <div class="flex justify-between items-center">
                 <div class="flex gap-2 h-fit items-center">
                     <i class="fa-solid fa-location-dot"></i>  
                     <p class="font-bold leading-none">${payload.location}</p>

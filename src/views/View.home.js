@@ -22,7 +22,7 @@ export default class Home {
   };
 
   setInputValue = positionData => {
-    this.input.value = `${positionData.city || positionData.locality}, ${positionData.countryCode}`;
+    this.input.value = `${positionData.locality}, ${positionData.country}`;
 
     return this;
   };
