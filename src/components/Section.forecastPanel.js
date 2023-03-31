@@ -7,7 +7,9 @@ const ForecastPanel = payload => `
                 <h5 class="text-slate-500 w-fit text-sm">24 hour</h5>
             </div>
             <div class="w-full flex flex-col items-center justify-center gap-1">
-                ${payload.map(item => ForecastCard(item)).join('')}
+                ${payload.results
+                  .map(result => ForecastCard({ result, timezone: payload.timezone }))
+                  .join('')}
             </div>
         </div>
     `;

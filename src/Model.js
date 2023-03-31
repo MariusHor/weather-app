@@ -1,13 +1,16 @@
-import WEATHER_API_URI from './constants/constants';
+import { MAX_FAV_COUNT, WEATHER_API_URI } from './constants/constants';
 import { fetchMultiple } from './utils/helpers';
 
 export default class Model {
   constructor() {
     this.state = {
-      currentSearch: {},
+      favorites: [],
+      currentSearch: null,
       history: [],
     };
   }
+
+  getLastLocationSearch = () => this.state.history.at(-1).currentWeather.name;
 
   getCoords = async input => {
     const response = await fetch(
@@ -28,8 +31,48 @@ export default class Model {
     ];
 
     await fetchMultiple(urls).then(data => {
-      this.saveCurrentSearch({ currentWeather: data[0], forecast: data[1].list.slice(0, 8) });
+      this.saveCurrentSearch({
+        currentWeather: data[0],
+        forecast: {
+          results: data[1].list.slice(0, 8),
+          timezone: data[1].city.timezone,
+        },
+      });
     });
+  };
+
+  getPositionData = () => ({
+    locality: this.state.currentSearch.currentWeather.name,
+    country: this.state.currentSearch.currentWeather.sys.country,
+  });
+
+  getFavorites = () => this.state.favorites;
+
+  isFavAlready = coords =>
+    this.state.favorites.some(
+      fav => fav.coords.lat === coords.lat && fav.coords.lon === coords.lon,
+    );
+
+  saveFavorite = tag => {
+    if (this.state.favorites.length >= MAX_FAV_COUNT) return;
+
+    try {
+      if (this.isFavAlready(this.state.history.at(-1).coords))
+        throw Error('Location already saved');
+      this.state = {
+        ...this.state,
+        favorites: [
+          ...this.state.favorites,
+          {
+            tag,
+            coords: this.state.history.at(-1).coords,
+          },
+        ],
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   };
 
   saveCurrentSearch = payload => {
@@ -48,7 +91,7 @@ export default class Model {
     this.state = {
       ...this.state,
       history: [...this.state.history, this.state.currentSearch],
-      currentSearch: {},
+      currentSearch: null,
     };
   };
 }

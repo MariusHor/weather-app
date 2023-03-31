@@ -23,8 +23,8 @@ export default class Sidebar {
   };
 
   render = data => {
-    if (data) {
-      append(this.parent, ForecastPanel(data));
-    } else append(this.parent, DefaultSidebar());
+    if (data?.forecast) {
+      append(this.parent, ForecastPanel(data.forecast));
+    } else append(this.parent, DefaultSidebar(data.favorites));
   };
 }

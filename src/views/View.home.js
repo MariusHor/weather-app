@@ -1,4 +1,4 @@
-import { append, getEl } from '../utils/helpers';
+import { append, getEl, toggleCSSclasses } from '../utils/helpers';
 import DefaultHome from '../components/Section.defaultHome';
 import Results from '../components/Section.results';
 
@@ -8,6 +8,7 @@ export default class Home {
     this.input = getEl(this.parent, '[data-input="search"]');
     this.form = getEl(this.parent, '[data-form="search"]');
     this.positionBtn = getEl(this.parent, '[data-btn="position"]');
+    this.homeBtn = getEl(root, '[data-btn="home"]');
   }
 
   removeLastChild = () => {
@@ -15,14 +16,14 @@ export default class Home {
     return this;
   };
 
-  focusInput = () => {
+  focusSearchInput = () => {
     this.input.focus();
 
     return this;
   };
 
-  setInputValue = positionData => {
-    this.input.value = `${positionData.city || positionData.locality}, ${positionData.countryCode}`;
+  setSearchInputValue = positionData => {
+    this.input.value = `${positionData.locality}, ${positionData.country}`;
 
     return this;
   };
@@ -33,6 +34,30 @@ export default class Home {
     this.positionBtn.classList.add('text-slate-400');
 
     return this;
+  };
+
+  revealFavInput = positionData => {
+    this.favoriteLabel.textContent = '';
+    toggleCSSclasses(this.favoriteInput, 'top-11', 'opacity-0', 'top-0', 'opacity-100');
+
+    this.favoriteInput.value = `#${positionData}`;
+    this.favoriteInput.focus();
+  };
+
+  hideFavoriteInput = () => {
+    toggleCSSclasses(this.favoriteInput, 'top-11', 'opacity-0', 'top-0', 'opacity-100');
+  };
+
+  renderSavedFeedback = feedback => {
+    if (feedback) {
+      this.favoriteLabel.innerHTML = feedback.message;
+    } else this.favoriteLabel.innerHTML = 'Favorite location saved!';
+
+    this.favoriteLabel.classList.add('opacity-100');
+
+    setTimeout(() => {
+      toggleCSSclasses(this.favoriteLabel, 'opacity-0', 'opacity-100');
+    }, 2000);
   };
 
   bindFormSubmit = callback => {
@@ -54,9 +79,43 @@ export default class Home {
     return this;
   }
 
-  render = payload => {
+  bindFavoriteBtnClick = callback => {
+    this.favoriteBtn.addEventListener('click', () => {
+      callback();
+      toggleCSSclasses(this.favoriteLabel, 'opacity-0', 'opacity-100');
+    });
+    return this;
+  };
+
+  bindHomeBtnClick = callback => {
+    this.homeBtn.addEventListener('click', () => {
+      callback();
+    });
+    return this;
+  };
+
+  bindFavoriteInputSubmit = callback => {
+    this.favoriteForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const favoriteTag = this.favoriteInput.value;
+
+      callback(favoriteTag);
+    });
+
+    return this;
+  };
+
+  render = (payload, clickCallback, submitCallback) => {
     if (payload) {
       append(this.parent, Results(payload));
-    } else append(this.parent, DefaultHome());
+
+      this.favoriteBtn = getEl(this.parent, '[data-btn="favorite"]');
+      this.favoriteLabel = getEl(this.parent, '[data-label="favorite"]');
+      this.favoriteInput = getEl(this.parent, '[data-input="favorite"]');
+      this.favoriteForm = getEl(this.parent, '[data-form="favorite"]');
+
+      return this.bindFavoriteBtnClick(clickCallback).bindFavoriteInputSubmit(submitCallback);
+    }
+    return append(this.parent, DefaultHome());
   };
 }

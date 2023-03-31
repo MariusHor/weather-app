@@ -30,3 +30,5 @@ export const fetchMultiple = async urls => {
     return { error };
   }
 };
+
+export const toggleCSSclasses = (el, ...cls) => cls.map(cl => el.classList.toggle(cl));
