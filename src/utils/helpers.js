@@ -1,10 +1,12 @@
 import moment from 'moment';
 
+export const getEl = (parent, selector) => parent.querySelector(selector);
+
+export const toggleCSSclasses = (el, ...cls) => cls.map(cl => el.classList.toggle(cl));
+
 export const append = (parent, content) => {
   parent.insertAdjacentHTML('beforeend', content);
 };
-
-export const getEl = (parent, selector) => parent.querySelector(selector);
 
 export const formatTime = (unixTimestamp, timezoneOffset = 0, timeFormat = 'h:mm A') =>
   moment.utc(unixTimestamp, 'X').add(timezoneOffset, 'seconds').format(timeFormat);
@@ -30,5 +32,3 @@ export const fetchMultiple = async urls => {
     return { error };
   }
 };
-
-export const toggleCSSclasses = (el, ...cls) => cls.map(cl => el.classList.toggle(cl));

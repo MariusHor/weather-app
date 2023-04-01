@@ -1,12 +1,12 @@
 import Home from './views/View.home';
 import Sidebar from './views/View.sidebar';
 import Footer from './views/View.footer';
-import Model from './Model';
-import Map from './Map';
-import Geolocation from './Geolocation';
+import Model from './model/Model';
+import Map from './map/Map';
+import Geolocation from './map/Geolocation';
+import { MAX_FAV_COUNT } from './constants/constants';
 
 import './App.scss';
-import { MAX_FAV_COUNT } from './constants/constants';
 
 export default class App {
   constructor(root) {
@@ -21,7 +21,10 @@ export default class App {
 
   handleFormSubmit = async input => {
     try {
-      if (!this.model.state.currentSearch) {
+      const { currentSearch } = this.model.state;
+      const { forecast } = currentSearch;
+
+      if (!currentSearch) {
         await this.model.getCoords(input);
         await this.model.getWeatherInfo();
       }
@@ -29,12 +32,10 @@ export default class App {
       this.home
         .removeLastChild()
         .render(
-          this.model.state.currentSearch.currentWeather,
+          currentSearch.currentWeather,
           this.handleFavoriteBtnClick,
           this.handleFavoriteSubmit,
         );
-
-      const { forecast } = this.model.state.currentSearch;
 
       this.sidebar.removeLastChild().render({ forecast });
       this.model.saveHistory();
@@ -45,9 +46,9 @@ export default class App {
   };
 
   handleMapClick = async coords => {
-    const { lat, lng } = coords;
-
     try {
+      const { lat, lng } = coords;
+
       this.model.saveCurrentSearch({ coords: { lat, lon: lng } });
       await this.model.getWeatherInfo();
 
@@ -61,6 +62,7 @@ export default class App {
           longitude: lng,
         },
       });
+
       this.home.setSearchInputValue(positionData).focusSearchInput();
     } catch (error) {
       console.log(error);
@@ -72,8 +74,8 @@ export default class App {
       await this.geolocation.checkGelocationPermission();
 
       const userPosition = await Geolocation.getUserPosition();
-
       const { latitude: lat, longitude: lon } = userPosition.coords;
+
       this.model.saveCurrentSearch({ coords: { lat, lon } });
 
       await this.model.getWeatherInfo();
@@ -86,17 +88,12 @@ export default class App {
     }
   };
 
-  handleFocusBtnClick = () => {
-    this.home.focusSearchInput();
-  };
-
   handleFavoriteSubmit = favoriteTag => {
     try {
       let favorites = this.model.getFavorites();
       if (favorites.length >= MAX_FAV_COUNT) throw Error('Maximum saved favorites reached');
 
       this.model.saveFavorite(favoriteTag);
-
       this.home.renderSavedFeedback();
 
       favorites = this.model.getFavorites();
@@ -106,6 +103,10 @@ export default class App {
     } finally {
       this.home.hideFavoriteInput();
     }
+  };
+
+  handleFocusBtnClick = () => {
+    this.home.focusSearchInput();
   };
 
   handleFavoriteBtnClick = () => {
@@ -120,7 +121,7 @@ export default class App {
     this.sidebar.removeLastChild().render({ favorites });
     this.map.loadMap().bindMapClick(this.handleMapClick);
 
-    if (this.map.homeCoords) {
+    if (this.map.isHomeSaved) {
       this.map.setHomeMarker();
     }
   };
@@ -136,13 +137,13 @@ export default class App {
   };
 
   mount() {
-    const { home, sidebar, footer, map, initListeners } = this;
-
+    const { home, sidebar, map, footer, initListeners } = this;
     const favorites = this.model.getFavorites();
 
     home.render();
     footer.render(favorites.length);
     sidebar.render({ favorites });
+
     map.loadMap();
 
     initListeners();

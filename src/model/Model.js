@@ -1,5 +1,5 @@
-import { MAX_FAV_COUNT, WEATHER_API_URI } from './constants/constants';
-import { fetchMultiple } from './utils/helpers';
+import { MAX_FAV_COUNT, WEATHER_API_URI } from '../constants/constants';
+import { fetchMultiple } from '../utils/helpers';
 
 export default class Model {
   constructor() {
@@ -41,10 +41,14 @@ export default class Model {
     });
   };
 
-  getPositionData = () => ({
-    locality: this.state.currentSearch.currentWeather.name,
-    country: this.state.currentSearch.currentWeather.sys.country,
-  });
+  getPositionData = () => {
+    const { name, sys } = this.state.currentSearch.currentWeather;
+
+    return {
+      locality: name,
+      country: sys.country,
+    };
+  };
 
   getFavorites = () => this.state.favorites;
 
