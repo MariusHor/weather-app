@@ -1,9 +1,10 @@
-import { MAX_FAV_COUNT, WEATHER_API_URI } from '../constants/constants';
+import { MAX_FAV_COUNT, API_WEATHER_URI, API_GEOCODE_URI } from '../constants/constants';
 import { fetchMultiple } from '../utils/helpers';
 
 export default class Model {
   constructor() {
     this.state = {
+      notifications: 0,
       favorites: [],
       currentSearch: {
         coords: null,
@@ -18,7 +19,7 @@ export default class Model {
 
   getCoords = async input => {
     const response = await fetch(
-      `${WEATHER_API_URI}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`,
+      `${API_WEATHER_URI}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`,
     );
     const data = await response.json();
     const { lat, lon } = data[0];
@@ -30,8 +31,8 @@ export default class Model {
     const { lat, lon } = this.state.currentSearch.coords;
 
     const urls = [
-      `${WEATHER_API_URI}data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
-      `${WEATHER_API_URI}data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
+      `${API_WEATHER_URI}data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
+      `${API_WEATHER_URI}data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
     ];
 
     await fetchMultiple(urls).then(data => {
@@ -45,16 +46,43 @@ export default class Model {
     });
   };
 
-  getPositionData = () => {
-    const { name, sys } = this.state.currentSearch.currentWeather;
+  static async getPositionData(userPosition) {
+    try {
+      const { lat, lon } = userPosition;
 
-    return {
-      locality: name,
-      country: sys.country,
-    };
-  };
+      const response = await fetch(
+        `${API_GEOCODE_URI}data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
+      );
+      const positionData = await response.json();
+      const { city, locality, countryCode } = positionData;
+
+      return {
+        locality: city || locality,
+        country: countryCode,
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 
   getFavorites = () => this.state.favorites;
+
+  increaseNotificationCount() {
+    this.state = {
+      ...this.state,
+      notifications: this.state.notifications + 1,
+    };
+  }
+
+  getNotificationCount = () => this.state.notifications;
+
+  resetNotificationCount() {
+    this.state = {
+      ...this.state,
+      notifications: 0,
+    };
+  }
 
   isFavAlready = coords =>
     this.state.favorites.some(
@@ -67,6 +95,7 @@ export default class Model {
     try {
       if (this.isFavAlready(this.state.history.at(-1).coords))
         throw Error('Location already saved');
+
       this.state = {
         ...this.state,
         favorites: [

@@ -3,6 +3,8 @@ import L from 'leaflet';
 export default class Layer {
   marker;
 
+  markers = [];
+
   coords;
 
   layer;
@@ -21,19 +23,36 @@ export default class Layer {
     return this;
   }
 
+  resetLayer() {
+    this.map.removeLayer(this.layer);
+    this.layer = null;
+
+    return this;
+  }
+
+  resetMarkers() {
+    this.marker = null;
+    this.markers = [];
+
+    return this;
+  }
+
   mount(map) {
-    if (!this.layer) this.createLayer();
+    this.map = map;
+
+    if (!this.layer) {
+      this.createLayer();
+    }
     if (this.marker) this.layer.removeLayer(this.marker);
 
     this.createMarker();
-
     this.layer.addLayer(this.marker);
-    map.addLayer(this.layer);
+    this.map.addLayer(this.layer);
   }
 
   storeCoords = position => {
-    const { latitude, longitude } = position.coords;
-    this.coords = [latitude, longitude];
+    const { lat, lon } = position.coords;
+    this.coords = [lat, lon];
 
     return this;
   };

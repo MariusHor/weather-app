@@ -4,7 +4,7 @@ import Footer from './views/View.footer';
 import Model from './model/Model';
 import Map from './map/Map';
 import Geolocation from './map/Geolocation';
-import { MAX_FAV_COUNT } from './constants/constants';
+import { CURRENT, FAVORITE, HOME, MAX_FAV_COUNT } from './constants/constants';
 
 import './App.scss';
 
@@ -21,18 +21,12 @@ export default class App {
 
   handleFormSubmit = async input => {
     try {
-      const { coords } = this.model.state.currentSearch;
-
-      if (!coords) {
-        await this.model.getCoords(input);
-        await this.model.getWeatherInfo();
-      }
+      await this.model.getCoords(input);
+      await this.model.getWeatherInfo();
 
       const { currentWeather, forecast } = this.model.state.currentSearch;
 
-      this.home
-        .removeLastChild()
-        .render(currentWeather, this.handleFavoriteBtnClick, this.handleFavoriteSubmit);
+      this.home.removeLastChild().render(currentWeather, this.handleFavoriteSubmit);
 
       this.sidebar.removeLastChild().render({ forecast });
       this.model.saveHistory();
@@ -44,20 +38,14 @@ export default class App {
 
   handleMapClick = async coords => {
     try {
-      const { lat, lng } = coords;
-
-      this.model.saveCurrentSearch({ coords: { lat, lon: lng } });
-      await this.model.getWeatherInfo();
-
-      const positionData = this.model.getPositionData();
+      const { lat, lng: lon } = coords;
+      const positionData = await Model.getPositionData({ lat, lon });
 
       if (!positionData.locality) return; // TODO Display NOT FOUND message
+      if (!this.map.currentLayer) this.map.createLayer(CURRENT);
 
-      this.map.setMarker('current', {
-        coords: {
-          latitude: lat,
-          longitude: lng,
-        },
+      this.map.setMarker(CURRENT, {
+        coords: { lat, lon },
       });
 
       this.home.setSearchInputValue(positionData).focusSearchInput();
@@ -72,46 +60,39 @@ export default class App {
 
       const userPosition = await Geolocation.getUserPosition();
       const { latitude: lat, longitude: lon } = userPosition.coords;
+      const positionData = await Model.getPositionData({ lat, lon });
 
-      this.model.saveCurrentSearch({ coords: { lat, lon } });
+      if (!this.map.homeLayer) this.map.createLayer(HOME);
+      if (this.map.currentLayer) this.map.resetLayer(CURRENT).resetMarkers(CURRENT);
 
-      await this.model.getWeatherInfo();
-      const positionData = this.model.getPositionData();
-
-      this.map.resetLayer('current');
-      this.map.setMarker('home', userPosition);
-
+      this.map.setMarker(HOME, { coords: { lat, lon } });
       this.home.disablePositionBtn().setSearchInputValue(positionData).focusSearchInput();
     } catch (error) {
       console.log(error);
     }
   };
 
-  handleFavoriteSubmit = favoriteTag => {
+  handleFavoriteSubmit = () => {
     try {
       let favorites = this.model.getFavorites();
+
       if (favorites.length >= MAX_FAV_COUNT) throw Error('Maximum saved favorites reached');
+      if (this.map.favoritesLayer) this.map.resetLayer(FAVORITE).resetMarkers(FAVORITE);
+      if (!this.map.favoritesLayer) this.map.createLayer(FAVORITE);
 
-      this.model.saveFavorite(favoriteTag);
-      this.home.renderSavedFeedback();
-      this.map.resetLayer('favorites');
-
+      const positionData = this.model.getLastLocationSearch();
+      this.model.saveFavorite(`#${positionData}`);
       favorites = this.model.getFavorites();
 
-      favorites.forEach(favorite =>
-        this.map.setMarker('favorite', {
-          coords: {
-            latitude: favorite.coords.lat,
-            longitude: favorite.coords.lon,
-          },
-        }),
-      );
+      favorites.forEach(favorite => {
+        const { coords } = favorite;
+        this.map.setMarker(FAVORITE, { coords });
+      });
 
       this.footer.render(favorites.length);
+      this.showNotificationCount();
     } catch (error) {
-      this.home.renderSavedFeedback(error);
-    } finally {
-      this.home.hideFavoriteInput();
+      console.log(error);
     }
   };
 
@@ -119,19 +100,30 @@ export default class App {
     this.home.focusSearchInput();
   };
 
-  handleFavoriteBtnClick = () => {
-    const positionData = this.model.getLastLocationSearch();
-    this.home.revealFavInput(positionData);
-  };
-
   handleHomeBtnClick = () => {
     const favorites = this.model.getFavorites();
 
     this.home.setSearchInputValue().removeLastChild().render();
     this.sidebar.removeLastChild().render({ favorites });
-    this.map.createMap().loadLayers().bindMapClick(this.handleMapClick);
 
     if (!this.map.hasHomePosition) this.home.enablePositionBtn();
+    if (this.home.notificationElement) this.removeNotificationCount();
+    if (this.map.map) this.map.map.remove();
+
+    this.map.createMap().loadLayers().bindMapClick(this.handleMapClick);
+  };
+
+  showNotificationCount = () => {
+    this.model.increaseNotificationCount();
+    const notificationCount = this.model.getNotificationCount();
+
+    if (!this.home.notificationElement) this.home.createNotificationElement();
+    this.home.renderNotificationCount(notificationCount);
+  };
+
+  removeNotificationCount = () => {
+    this.model.resetNotificationCount();
+    this.home.removeNotificationCount();
   };
 
   initListeners = () => {
@@ -152,7 +144,7 @@ export default class App {
     footer.render(favorites.length);
     sidebar.render({ favorites });
 
-    map.createMap().createLayers();
+    map.createMap();
 
     initListeners();
   }

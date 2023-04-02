@@ -3,11 +3,6 @@ import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from '../const
 import Layer from './Layer';
 
 export default class CurrentLayer extends Layer {
-  constructor(map) {
-    super();
-    this.map = map;
-  }
-
   createMarker() {
     const blueIcon = new L.Icon({
       iconUrl: `${MARKER_ICON_URI}marker-icon-2x-blue.png`,

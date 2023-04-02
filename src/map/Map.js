@@ -8,8 +8,10 @@ import {
   MAP_MAX_BOUNDS,
   MAP_MAX_VISCOSITY,
   MAP_MAX_ZOOM,
-  MARKER_CURRENT,
-  MARKER_FAVORITE,
+  CURRENT,
+  FAVORITE,
+  API_MAPTILER_URI,
+  MAP_SELECTOR,
 } from '../constants/constants';
 import HomeLayer from './HomeLayer';
 import CurrentLayer from './CurrentLayer';
@@ -21,15 +23,13 @@ export default class Map {
   map;
 
   createMap(coords = [50, 20]) {
-    if (this.map) this.map.remove();
-
-    this.map = L.map('map', {
+    this.map = L.map(MAP_SELECTOR, {
       maxBounds: MAP_MAX_BOUNDS,
       maxBoundsViscosity: MAP_MAX_VISCOSITY,
     }).setView(coords, MAP_MAX_ZOOM);
 
     L.tileLayer(
-      `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${process.env.MAP_TILER_KEY}`,
+      `${API_MAPTILER_URI}maps/streets-v2/{z}/{x}/{y}.png?key=${process.env.MAP_TILER_KEY}`,
       {
         tileSize: 512,
         zoomOffset: -1,
@@ -43,10 +43,10 @@ export default class Map {
 
   setMarker = (type, position) => {
     switch (type) {
-      case MARKER_CURRENT:
+      case CURRENT:
         this.currentLayer.storeCoords(position).mount(this.map);
         break;
-      case MARKER_FAVORITE:
+      case FAVORITE:
         this.favoritesLayer.storeCoords(position).mount(this.map);
         break;
       default:
@@ -55,6 +55,56 @@ export default class Map {
     }
   };
 
+  resetMarkers(marker) {
+    switch (marker) {
+      case CURRENT:
+        this.currentLayer.resetMarkers();
+        break;
+      case FAVORITE:
+        this.favoritesLayer.resetMarkers();
+        break;
+      default:
+        this.homeLayer.resetMarkers();
+    }
+
+    return this;
+  }
+
+  createLayer = layer => {
+    switch (layer) {
+      case CURRENT:
+        this.currentLayer = new CurrentLayer();
+        break;
+      case FAVORITE:
+        this.favoritesLayer = new FavoritesLayer();
+        break;
+      default:
+        this.homeLayer = new HomeLayer();
+    }
+  };
+
+  resetLayer(layer) {
+    switch (layer) {
+      case CURRENT:
+        this.currentLayer.resetLayer();
+        break;
+      case FAVORITE:
+        this.favoritesLayer.resetLayer();
+        break;
+      default:
+        this.homeLayer.resetLayer();
+    }
+
+    return this;
+  }
+
+  loadLayers() {
+    if (this.homeLayer) this.homeLayer.loadLayer(this.map);
+    if (this.favoritesLayer) this.favoritesLayer.loadLayer(this.map);
+
+    return this;
+  }
+
   bindMapClick = callback => {
     this.map.on('click', e => {
       callback(e.latlng);
@@ -62,33 +112,4 @@ export default class Map {
 
     return this;
   };
-
-  resetLayer(layer) {
-    switch (layer) {
-      case 'current':
-        this.currentLayer.layer.removeLayer(this.currentLayer.marker);
-        this.currentLayer.marker = null;
-        break;
-      case 'favorites':
-        this.favoritesLayer.layer = null;
-        this.favoritesLayer.markers = [];
-        break;
-      default:
-        this.homeLayer.layer = null;
-        this.hasHomePosition = false;
-    }
-  }
-
-  createLayers() {
-    this.homeLayer = new HomeLayer(this.map);
-    this.currentLayer = new CurrentLayer(this.map);
-    this.favoritesLayer = new FavoritesLayer(this.map);
-  }
-
-  loadLayers() {
-    if (this.homeLayer.layer) this.homeLayer.loadLayer(this.map);
-    if (this.favoritesLayer.layer) this.favoritesLayer.loadLayer(this.map);
-
-    return this;
-  }
 }

@@ -3,13 +3,6 @@ import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from '../const
 import Layer from './Layer';
 
 export default class FavoritesLayer extends Layer {
-  constructor(map) {
-    super();
-    this.map = map;
-  }
-
-  markers = [];
-
   createMarker = () => {
     const redIcon = new L.Icon({
       iconUrl: `${MARKER_ICON_URI}marker-icon-2x-red.png`,
@@ -48,11 +41,12 @@ export default class FavoritesLayer extends Layer {
   mount(map) {
     this.map = map;
 
-    if (!this.layer) this.createClusterLayer();
+    if (!this.layer) {
+      this.createClusterLayer();
+      this.map.addLayer(this.layer);
+    }
 
     this.createMarker();
-
     this.markers.map(marker => this.layer.addLayer(marker));
-    this.map.addLayer(this.layer);
   }
 }

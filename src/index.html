@@ -15,15 +15,20 @@
               <i class="fa-solid fa-cloud-sun-rain text-amber-600 text-3xl"></i>
             </a>
             <div class="h-full w-full justify-center flex items-center">
-              <button class="shadow-xl rounded-full p-2 w-11 h-11 active" data-btn="home">
-                <i class="fa-solid fa-house"></i>
-              </button>
+              <div class="relative" data-container="home-btn">
+                <button
+                  class="shadow-lg shadow-blue-500/50 hover:shadow-blue-300/50 rounded-full p-2 w-11 h-11 active transition duration-250 ease-in-out hover:text-lg"
+                  data-btn="home"
+                >
+                  <i class="fa-solid fa-house"></i>
+                </button>
+              </div>
             </div>
           </div>
           <div class="col-span-5 flex flex-col items-center gap-10 m-5" data-root="home">
             <form class="max-w-sm w-full mx-auto mt-10" data-form="search">
               <div
-                class="flex items-center gap-3 w-full h-12 rounded-lg shadow-md focus-within:shadow-lg bg-white overflow-hidden p-3"
+                class="flex hover:shadow-blue-300/50 items-center gap-3 w-full h-12 rounded-lg shadow-lg outline outline-0 outline-offset-2 outline-blue-500 focus-within:outline-2 focus-within:shadow-blue-300/50 bg-white overflow-hidden p-3 transition duration-250 ease-in-out"
               >
                 <button type="button" data-btn="position" class="text-lg text-slate-700">
                   <i class="fa-solid fa-location-crosshairs"></i>
