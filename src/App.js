@@ -53,7 +53,7 @@ export default class App {
 
       if (!positionData.locality) return; // TODO Display NOT FOUND message
 
-      this.map.setCurrentMarker({
+      this.map.setMarker('current', {
         coords: {
           latitude: lat,
           longitude: lng,
@@ -78,8 +78,9 @@ export default class App {
       await this.model.getWeatherInfo();
       const positionData = this.model.getPositionData();
 
-      // TODO remove current marker if present
-      this.map.setHomeMarker(userPosition);
+      this.map.resetLayer('current');
+      this.map.setMarker('home', userPosition);
+
       this.home.disablePositionBtn().setSearchInputValue(positionData).focusSearchInput();
     } catch (error) {
       console.log(error);
@@ -93,8 +94,19 @@ export default class App {
 
       this.model.saveFavorite(favoriteTag);
       this.home.renderSavedFeedback();
+      this.map.resetLayer('favorites');
 
       favorites = this.model.getFavorites();
+
+      favorites.forEach(favorite =>
+        this.map.setMarker('favorite', {
+          coords: {
+            latitude: favorite.coords.lat,
+            longitude: favorite.coords.lon,
+          },
+        }),
+      );
+
       this.footer.render(favorites.length);
     } catch (error) {
       this.home.renderSavedFeedback(error);
@@ -117,11 +129,9 @@ export default class App {
 
     this.home.setSearchInputValue().removeLastChild().render();
     this.sidebar.removeLastChild().render({ favorites });
-    this.map.loadMap().bindMapClick(this.handleMapClick);
+    this.map.createMap().loadLayers().bindMapClick(this.handleMapClick);
 
-    if (this.map.hasHomeCoords) {
-      this.map.setHomeMarker();
-    } else this.home.enablePositionBtn();
+    if (!this.map.hasHomePosition) this.home.enablePositionBtn();
   };
 
   initListeners = () => {
@@ -142,7 +152,7 @@ export default class App {
     footer.render(favorites.length);
     sidebar.render({ favorites });
 
-    map.loadMap();
+    map.createMap().createLayers();
 
     initListeners();
   }

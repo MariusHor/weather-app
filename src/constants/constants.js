@@ -1,5 +1,8 @@
 import L from 'leaflet';
 
+export const MARKER_CURRENT = 'current';
+export const MARKER_HOME = 'home';
+export const MARKER_FAVORITE = 'favorite';
 export const WEATHER_API_URI = 'http://api.openweathermap.org/';
 export const MARKER_ICON_URI =
   'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';

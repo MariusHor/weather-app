@@ -4,21 +4,25 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet/dist/leaflet.css';
 
-import { MAP_MAX_BOUNDS, MAP_MAX_VISCOSITY, MAP_MAX_ZOOM } from '../constants/constants';
+import {
+  MAP_MAX_BOUNDS,
+  MAP_MAX_VISCOSITY,
+  MAP_MAX_ZOOM,
+  MARKER_CURRENT,
+  MARKER_FAVORITE,
+} from '../constants/constants';
 import HomeLayer from './HomeLayer';
 import CurrentLayer from './CurrentLayer';
 import FavoritesLayer from './FavoritesLayer';
 
 export default class Map {
-  constructor() {
-    this.homeLayer = new HomeLayer();
-    this.currentLayer = new CurrentLayer();
-    this.favoritesLayer = new FavoritesLayer();
-  }
+  hasHomePosition;
 
-  hasHomeCoords;
+  map;
 
-  #createMap(coords = [50, 20]) {
+  createMap(coords = [50, 20]) {
+    if (this.map) this.map.remove();
+
     this.map = L.map('map', {
       maxBounds: MAP_MAX_BOUNDS,
       maxBoundsViscosity: MAP_MAX_VISCOSITY,
@@ -33,21 +37,22 @@ export default class Map {
         crossOrigin: true,
       },
     ).addTo(this.map);
+
+    return this;
   }
 
-  setCurrentMarker = position => {
-    this.currentLayer.storeCoords(position).createCurrentMarker();
-  };
-
-  setHomeMarker = position => {
-    if (position) this.homeLayer.storeCoords(position);
-    this.homeLayer.createHomeMarker();
-
-    this.hasHomeCoords = true;
-  };
-
-  setFavMarker = position => {
-    this.favoritesLayer.storeCoords(position).createFavMarker();
+  setMarker = (type, position) => {
+    switch (type) {
+      case MARKER_CURRENT:
+        this.currentLayer.storeCoords(position).mount(this.map);
+        break;
+      case MARKER_FAVORITE:
+        this.favoritesLayer.storeCoords(position).mount(this.map);
+        break;
+      default:
+        this.homeLayer.storeCoords(position).mount(this.map);
+        this.hasHomePosition = true;
+    }
   };
 
   bindMapClick = callback => {
@@ -58,13 +63,32 @@ export default class Map {
     return this;
   };
 
-  loadMap = () => {
-    this.#createMap();
+  resetLayer(layer) {
+    switch (layer) {
+      case 'current':
+        this.currentLayer.layer.removeLayer(this.currentLayer.marker);
+        this.currentLayer.marker = null;
+        break;
+      case 'favorites':
+        this.favoritesLayer.layer = null;
+        this.favoritesLayer.markers = [];
+        break;
+      default:
+        this.homeLayer.layer = null;
+        this.hasHomePosition = false;
+    }
+  }
 
-    this.homeLayer.loadLayer(this.map);
-    this.currentLayer.loadLayer(this.map);
-    // this.favoritesLayer.loadLayer(this.map);
+  createLayers() {
+    this.homeLayer = new HomeLayer(this.map);
+    this.currentLayer = new CurrentLayer(this.map);
+    this.favoritesLayer = new FavoritesLayer(this.map);
+  }
+
+  loadLayers() {
+    if (this.homeLayer.layer) this.homeLayer.loadLayer(this.map);
+    if (this.favoritesLayer.layer) this.favoritesLayer.loadLayer(this.map);
 
     return this;
-  };
+  }
 }

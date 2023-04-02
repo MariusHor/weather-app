@@ -1,21 +1,23 @@
 import L from 'leaflet';
 import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from '../constants/constants';
+import Layer from './Layer';
 
-export default class FavoritesLayer {
-  #favLocationsLayer;
+export default class FavoritesLayer extends Layer {
+  constructor(map) {
+    super();
+    this.map = map;
+  }
 
-  #favMarker;
+  markers = [];
 
-  #coords;
-
-  createFavMarker = () => {
+  createMarker = () => {
     const redIcon = new L.Icon({
       iconUrl: `${MARKER_ICON_URI}marker-icon-2x-red.png`,
       shadowUrl: MARKER_SHADOW_URL,
       ...MARKER_ICON_PARAMS,
     });
 
-    this.#favMarker = L.marker(this.#coords, {
+    const marker = L.marker(this.coords, {
       opacity: 0.8,
       icon: redIcon,
     })
@@ -28,34 +30,29 @@ export default class FavoritesLayer {
           className: 'current-position-popup',
         }),
       )
-      .setPopupContent('You are here!')
+      .setPopupContent('Favorite!')
       .on('click', () => {
-        this.#favMarker.setOpacity(0.8);
+        marker.setOpacity(0.8);
       })
       .on('mouseover ', () => {
-        this.#favMarker.openPopup();
+        marker.openPopup();
       })
       .on('mouseout ', () => {
-        this.#favMarker.closePopup();
+        marker.closePopup();
       })
-      .openPopup()
-      .addTo(this.map);
+      .openPopup();
+
+    this.markers = [...this.markers, marker];
   };
 
-  #createFavLocationsLayer() {
-    this.#favLocationsLayer = L.markerClusterGroup();
-    this.map.addLayer(this.#favLocationsLayer);
-  }
-
-  storeCoords = position => {
-    const { latitude, longitude } = position.coords;
-    this.#coords = [latitude, longitude];
-
-    return this;
-  };
-
-  loadLayer = map => {
+  mount(map) {
     this.map = map;
-    this.#createFavLocationsLayer();
-  };
+
+    if (!this.layer) this.createClusterLayer();
+
+    this.createMarker();
+
+    this.markers.map(marker => this.layer.addLayer(marker));
+    this.map.addLayer(this.layer);
+  }
 }

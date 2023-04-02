@@ -1,21 +1,21 @@
 import L from 'leaflet';
 import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from '../constants/constants';
+import Layer from './Layer';
 
-export default class HomeLayer {
-  #homeLayer;
+export default class HomeLayer extends Layer {
+  constructor(map) {
+    super();
+    this.map = map;
+  }
 
-  #homeMarker;
-
-  #coords;
-
-  createHomeMarker() {
+  createMarker() {
     const greenIcon = new L.Icon({
       iconUrl: `${MARKER_ICON_URI}marker-icon-2x-green.png`,
       shadowUrl: MARKER_SHADOW_URL,
       ...MARKER_ICON_PARAMS,
     });
 
-    this.#homeMarker = L.marker(this.#coords, {
+    this.marker = L.marker(this.coords, {
       opacity: 0.8,
       icon: greenIcon,
     })
@@ -28,40 +28,21 @@ export default class HomeLayer {
           className: 'current-position-popup',
         }),
       )
-      .setPopupContent('You are here!')
+      .setPopupContent('Home!')
       .on('click', () => {
-        this.#homeMarker.setOpacity(0.8);
+        this.marker.setOpacity(0.8);
       })
       .on('mouseover ', () => {
-        this.#homeMarker.openPopup();
+        this.marker.openPopup();
       })
       .on('mouseout ', () => {
-        this.#homeMarker.closePopup();
+        this.marker.closePopup();
       })
       .openPopup();
 
-    this.#homeLayer.addLayer(this.#homeMarker);
-
     this.map.on('click', () => {
-      this.#homeMarker.setOpacity(0.4);
-      this.#homeMarker.closePopup();
+      this.marker.setOpacity(0.4);
+      this.marker.closePopup();
     });
   }
-
-  storeCoords = position => {
-    const { latitude, longitude } = position.coords;
-    this.#coords = [latitude, longitude];
-
-    return this;
-  };
-
-  #createHomeLayer = () => {
-    this.#homeLayer = L.layerGroup();
-    this.map.addLayer(this.#homeLayer);
-  };
-
-  loadLayer = map => {
-    this.map = map;
-    this.#createHomeLayer();
-  };
 }

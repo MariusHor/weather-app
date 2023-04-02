@@ -1,23 +1,21 @@
 import L from 'leaflet';
 import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from '../constants/constants';
+import Layer from './Layer';
 
-export default class CurrentLayer {
-  #coords;
+export default class CurrentLayer extends Layer {
+  constructor(map) {
+    super();
+    this.map = map;
+  }
 
-  #currentLocationLayer;
-
-  #currentMarker;
-
-  createCurrentMarker() {
-    if (this.#currentMarker) this.#currentLocationLayer.removeLayer(this.#currentMarker);
-
+  createMarker() {
     const blueIcon = new L.Icon({
       iconUrl: `${MARKER_ICON_URI}marker-icon-2x-blue.png`,
       shadowUrl: MARKER_SHADOW_URL,
       ...MARKER_ICON_PARAMS,
     });
 
-    this.#currentMarker = L.marker(this.#coords, {
+    this.marker = L.marker(this.coords, {
       opacity: 0.8,
       icon: blueIcon,
     })
@@ -30,35 +28,16 @@ export default class CurrentLayer {
           className: 'current-position-popup',
         }),
       )
-      .setPopupContent('You are here!')
+      .setPopupContent('Current!')
       .on('click', () => {
-        this.#currentMarker.setOpacity(0.8);
+        this.marker.setOpacity(0.8);
       })
       .on('mouseover ', () => {
-        this.#currentMarker.openPopup();
+        this.marker.openPopup();
       })
       .on('mouseout ', () => {
-        this.#currentMarker.closePopup();
+        this.marker.closePopup();
       })
       .openPopup();
-
-    this.#currentLocationLayer.addLayer(this.#currentMarker);
   }
-
-  #createCurrentLocationLayer = () => {
-    this.#currentLocationLayer = L.layerGroup();
-    this.map.addLayer(this.#currentLocationLayer);
-  };
-
-  storeCoords = position => {
-    const { latitude, longitude } = position.coords;
-    this.#coords = [latitude, longitude];
-
-    return this;
-  };
-
-  loadLayer = map => {
-    this.map = map;
-    this.#createCurrentLocationLayer();
-  };
 }
