@@ -16,7 +16,7 @@ export default class Map {
     this.favoritesLayer = new FavoritesLayer();
   }
 
-  isHomeSaved;
+  hasHomeCoords;
 
   #createMap(coords = [50, 20]) {
     this.map = L.map('map', {
@@ -40,8 +40,10 @@ export default class Map {
   };
 
   setHomeMarker = position => {
-    this.homeLayer.storeCoords(position).createHomeMarker();
-    this.isHomeSaved = true;
+    if (position) this.homeLayer.storeCoords(position);
+    this.homeLayer.createHomeMarker();
+
+    this.hasHomeCoords = true;
   };
 
   setFavMarker = position => {
@@ -61,7 +63,7 @@ export default class Map {
 
     this.homeLayer.loadLayer(this.map);
     this.currentLayer.loadLayer(this.map);
-    this.favoritesLayer.loadLayer(this.map);
+    // this.favoritesLayer.loadLayer(this.map);
 
     return this;
   };

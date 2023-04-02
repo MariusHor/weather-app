@@ -5,7 +5,11 @@ export default class Model {
   constructor() {
     this.state = {
       favorites: [],
-      currentSearch: null,
+      currentSearch: {
+        coords: null,
+        currentWeather: null,
+        forecast: null,
+      },
       history: [],
     };
   }
@@ -95,7 +99,11 @@ export default class Model {
     this.state = {
       ...this.state,
       history: [...this.state.history, this.state.currentSearch],
-      currentSearch: null,
+      currentSearch: {
+        coords: null,
+        currentWeather: null,
+        forecast: null,
+      },
     };
   };
 }

@@ -1,4 +1,5 @@
 import L from 'leaflet';
+import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from '../constants/constants';
 
 export default class CurrentLayer {
   #coords;
@@ -11,13 +12,9 @@ export default class CurrentLayer {
     if (this.#currentMarker) this.#currentLocationLayer.removeLayer(this.#currentMarker);
 
     const blueIcon = new L.Icon({
-      iconUrl:
-        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41],
+      iconUrl: `${MARKER_ICON_URI}marker-icon-2x-blue.png`,
+      shadowUrl: MARKER_SHADOW_URL,
+      ...MARKER_ICON_PARAMS,
     });
 
     this.#currentMarker = L.marker(this.#coords, {
@@ -54,10 +51,9 @@ export default class CurrentLayer {
   };
 
   storeCoords = position => {
-    if (position) {
-      const { latitude, longitude } = position.coords;
-      this.#coords = [latitude, longitude];
-    }
+    const { latitude, longitude } = position.coords;
+    this.#coords = [latitude, longitude];
+
     return this;
   };
 

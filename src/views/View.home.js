@@ -23,7 +23,9 @@ export default class Home {
   };
 
   setSearchInputValue = positionData => {
-    this.input.value = `${positionData.locality}, ${positionData.country}`;
+    if (positionData) {
+      this.input.value = `${positionData.locality}, ${positionData.country}`;
+    } else this.input.value = '';
 
     return this;
   };
@@ -32,6 +34,14 @@ export default class Home {
     this.positionBtn.setAttribute('disabled', true);
     this.positionBtn.classList.remove('text-slate-700');
     this.positionBtn.classList.add('text-slate-400');
+
+    return this;
+  };
+
+  enablePositionBtn = () => {
+    this.positionBtn.removeAttribute('disabled');
+    this.positionBtn.classList.add('text-slate-700');
+    this.positionBtn.classList.remove('text-slate-400');
 
     return this;
   };

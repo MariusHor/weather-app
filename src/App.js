@@ -21,21 +21,18 @@ export default class App {
 
   handleFormSubmit = async input => {
     try {
-      const { currentSearch } = this.model.state;
-      const { forecast } = currentSearch;
+      const { coords } = this.model.state.currentSearch;
 
-      if (!currentSearch) {
+      if (!coords) {
         await this.model.getCoords(input);
         await this.model.getWeatherInfo();
       }
 
+      const { currentWeather, forecast } = this.model.state.currentSearch;
+
       this.home
         .removeLastChild()
-        .render(
-          currentSearch.currentWeather,
-          this.handleFavoriteBtnClick,
-          this.handleFavoriteSubmit,
-        );
+        .render(currentWeather, this.handleFavoriteBtnClick, this.handleFavoriteSubmit);
 
       this.sidebar.removeLastChild().render({ forecast });
       this.model.saveHistory();
@@ -54,7 +51,7 @@ export default class App {
 
       const positionData = this.model.getPositionData();
 
-      if (!positionData.locality) return; // Display NOT FOUND message
+      if (!positionData.locality) return; // TODO Display NOT FOUND message
 
       this.map.setCurrentMarker({
         coords: {
@@ -81,6 +78,7 @@ export default class App {
       await this.model.getWeatherInfo();
       const positionData = this.model.getPositionData();
 
+      // TODO remove current marker if present
       this.map.setHomeMarker(userPosition);
       this.home.disablePositionBtn().setSearchInputValue(positionData).focusSearchInput();
     } catch (error) {
@@ -117,13 +115,13 @@ export default class App {
   handleHomeBtnClick = () => {
     const favorites = this.model.getFavorites();
 
-    this.home.removeLastChild().render();
+    this.home.setSearchInputValue().removeLastChild().render();
     this.sidebar.removeLastChild().render({ favorites });
     this.map.loadMap().bindMapClick(this.handleMapClick);
 
-    if (this.map.isHomeSaved) {
+    if (this.map.hasHomeCoords) {
       this.map.setHomeMarker();
-    }
+    } else this.home.enablePositionBtn();
   };
 
   initListeners = () => {
