@@ -26,11 +26,12 @@ export default class App {
 
       const { currentWeather, forecast } = this.model.state.currentSearch;
 
-      this.home.removeLastChild().render(currentWeather, this.handleFavoriteSubmit);
-
+      this.home
+        .removeLastChild()
+        .disablePositionBtn()
+        .render(currentWeather, this.handleFavoriteSubmit);
       this.sidebar.removeLastChild().render({ forecast });
       this.model.saveHistory();
-      this.home.disablePositionBtn();
     } catch (error) {
       console.log(error);
     }
@@ -44,10 +45,7 @@ export default class App {
       if (!positionData.locality) return; // TODO Display NOT FOUND message
       if (!this.map.currentLayer) this.map.createLayer(CURRENT);
 
-      this.map.setMarker(CURRENT, {
-        coords: { lat, lon },
-      });
-
+      this.map.setMarker(CURRENT, { coords: { lat, lon } });
       this.home.setSearchInputValue(positionData).focusSearchInput();
     } catch (error) {
       console.log(error);
@@ -81,16 +79,16 @@ export default class App {
       if (!this.map.favoritesLayer) this.map.createLayer(FAVORITE);
 
       const positionData = this.model.getLastLocationSearch();
-      this.model.saveFavorite(`#${positionData}`);
-      favorites = this.model.getFavorites();
+      this.model.increaseNotificationCount().saveFavorite(`#${positionData}`);
+      this.showNotificationCount();
 
+      favorites = this.model.getFavorites();
       favorites.forEach(favorite => {
         const { coords } = favorite;
         this.map.setMarker(FAVORITE, { coords });
       });
 
       this.footer.render(favorites.length);
-      this.showNotificationCount();
     } catch (error) {
       console.log(error);
     }
@@ -108,13 +106,11 @@ export default class App {
 
     if (!this.map.hasHomePosition) this.home.enablePositionBtn();
     if (this.home.notificationElement) this.removeNotificationCount();
-    if (this.map.map) this.map.map.remove();
 
-    this.map.createMap().loadLayers().bindMapClick(this.handleMapClick);
+    this.map.removeMap().createMap().loadLayers().bindMapClick(this.handleMapClick);
   };
 
   showNotificationCount = () => {
-    this.model.increaseNotificationCount();
     const notificationCount = this.model.getNotificationCount();
 
     if (!this.home.notificationElement) this.home.createNotificationElement();
@@ -144,6 +140,7 @@ export default class App {
     footer.render(favorites.length);
     sidebar.render({ favorites });
 
+    console.log(map);
     map.createMap();
 
     initListeners();

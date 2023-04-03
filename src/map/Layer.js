@@ -14,7 +14,7 @@ export default class Layer {
   };
 
   createClusterLayer = () => {
-    this.layer = L.markerClusterGroup();
+    this.layer = L.markerClusterGroup({});
   };
 
   loadLayer(map) {

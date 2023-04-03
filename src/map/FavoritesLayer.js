@@ -35,7 +35,7 @@ export default class FavoritesLayer extends Layer {
       })
       .openPopup();
 
-    this.markers = [...this.markers, marker];
+    return marker;
   };
 
   mount(map) {
@@ -46,7 +46,7 @@ export default class FavoritesLayer extends Layer {
       this.map.addLayer(this.layer);
     }
 
-    this.createMarker();
-    this.markers.map(marker => this.layer.addLayer(marker));
+    const marker = this.createMarker();
+    this.layer.addLayer(marker);
   }
 }

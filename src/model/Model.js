@@ -18,13 +18,19 @@ export default class Model {
   getLastLocationSearch = () => this.state.history.at(-1).currentWeather.name;
 
   getCoords = async input => {
-    const response = await fetch(
-      `${API_WEATHER_URI}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`,
-    );
-    const data = await response.json();
-    const { lat, lon } = data[0];
+    try {
+      const response = await fetch(
+        `${API_WEATHER_URI}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`,
+      );
+      const data = await response.json();
 
-    this.saveCurrentSearch({ coords: { lat, lon } });
+      const { lat, lon } = data[0];
+
+      this.saveCurrentSearch({ coords: { lat, lon } });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   };
 
   getWeatherInfo = async () => {
@@ -35,7 +41,9 @@ export default class Model {
       `${API_WEATHER_URI}data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
     ];
 
-    await fetchMultiple(urls).then(data => {
+    try {
+      const data = await fetchMultiple(urls);
+
       this.saveCurrentSearch({
         currentWeather: data[0],
         forecast: {
@@ -43,7 +51,10 @@ export default class Model {
           timezone: data[1].city.timezone,
         },
       });
-    });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   };
 
   static async getPositionData(userPosition) {
@@ -53,8 +64,9 @@ export default class Model {
       const response = await fetch(
         `${API_GEOCODE_URI}data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
       );
-      const positionData = await response.json();
-      const { city, locality, countryCode } = positionData;
+      const data = await response.json();
+
+      const { city, locality, countryCode } = data;
 
       return {
         locality: city || locality,
@@ -68,13 +80,6 @@ export default class Model {
 
   getFavorites = () => this.state.favorites;
 
-  increaseNotificationCount() {
-    this.state = {
-      ...this.state,
-      notifications: this.state.notifications + 1,
-    };
-  }
-
   getNotificationCount = () => this.state.notifications;
 
   resetNotificationCount() {
@@ -82,6 +87,15 @@ export default class Model {
       ...this.state,
       notifications: 0,
     };
+  }
+
+  increaseNotificationCount() {
+    this.state = {
+      ...this.state,
+      notifications: this.state.notifications + 1,
+    };
+
+    return this;
   }
 
   isFavAlready = coords =>

@@ -41,6 +41,11 @@ export default class Map {
     return this;
   }
 
+  removeMap() {
+    this.map.remove();
+    return this;
+  }
+
   setMarker = (type, position) => {
     switch (type) {
       case CURRENT:
@@ -100,7 +105,11 @@ export default class Map {
 
   loadLayers() {
     if (this.homeLayer) this.homeLayer.loadLayer(this.map);
-    if (this.favoritesLayer) this.favoritesLayer.loadLayer(this.map);
+    if (this.favoritesLayer) {
+      setTimeout(() => {
+        this.favoritesLayer.loadLayer(this.map);
+      }, 0);
+    }
 
     return this;
   }
