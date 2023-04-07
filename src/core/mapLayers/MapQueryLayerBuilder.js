@@ -1,46 +1,50 @@
 import L from 'leaflet';
-import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from 'constants';
+import { BLUE } from 'constants';
+import { MapPopupSecondary } from 'components';
 import Layer from './Layer';
 
 export default class MapQueryLayerBuilder extends Layer {
-  createMarker = (coords, map) => {
-    const { lat, lon } = coords;
+  markerIcon;
 
-    const blueIcon = new L.Icon({
-      iconUrl: `${MARKER_ICON_URI}marker-icon-2x-blue.png`,
-      shadowUrl: MARKER_SHADOW_URL,
-      ...MARKER_ICON_PARAMS,
-    });
+  marker;
+
+  popupTimeout;
+
+  createMarker = (location, map) => {
+    const { lat, lon } = location.coords;
 
     this.marker = L.marker([lat, lon], {
       opacity: 0.8,
-      icon: blueIcon,
+      icon: this.getMarkerIcon(BLUE),
     })
       .bindPopup(
         L.popup({
           maxWidth: 200,
-          minWidth: 100,
+          minWidth: 80,
           autoClose: false,
           closeOnClick: false,
           className: 'current-position-popup',
         }),
       )
-      .setPopupContent('Home!')
+      .setPopupContent(MapPopupSecondary())
       .on('click', () => {
+        if (this.popupTimeout) clearTimeout(this.popupTimeout);
         this.marker.setOpacity(0.8);
       })
       .on('mouseover ', () => {
+        if (this.popupTimeout) clearTimeout(this.popupTimeout);
+        this.marker.setOpacity(0.8);
         this.marker.openPopup();
       })
       .on('mouseout ', () => {
-        this.marker.closePopup();
+        this.popupTimeout = setTimeout(() => {
+          this.marker.setOpacity(0.4);
+          this.marker.closePopup();
+        }, 4000);
       })
       .openPopup();
 
-    map.on('click', () => {
-      this.marker.setOpacity(0.4);
-      this.marker.closePopup();
-    });
+    this.initListeners(map);
 
     return this.marker;
   };

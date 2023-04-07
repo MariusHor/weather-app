@@ -14,10 +14,10 @@ export default class Footer {
 
     switch (state.favorites.length) {
       case 0:
-        this.header.innerHTML = `<h1>You can save up to <span class="text-amber-600">${MAX_FAV_COUNT}</span> different locations</h1>`;
+        this.header.innerHTML = `<h1 class="text-center">You can save up to <span class="text-amber-600">${MAX_FAV_COUNT}</span> different locations</h1>`;
         break;
       case MAX_FAV_COUNT:
-        this.header.innerHTML = `<h1>You have reached the <span class="text-amber-600">max</span> number of saved locations</h1>`;
+        this.header.innerHTML = `<h1 class="text-center">You have reached the <span class="text-amber-600">max</span> number of saved locations</h1>`;
         break;
       default:
         this.header.innerHTML = `<h1 class="text-center">You can still save <span class="text-amber-600">${favsLeft}</span> more ${

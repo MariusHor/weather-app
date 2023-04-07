@@ -3,6 +3,7 @@ import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet/dist/leaflet.css';
+import { getEl } from 'utils/helpers';
 
 import {
   MAP_MAX_BOUNDS,
@@ -11,12 +12,17 @@ import {
   API_MAPTILER_URI,
   MAP_SELECTOR,
   MAP_DEFAULT_COORDS,
+  CURRENT,
+  FAVORITES,
+  MAP_QUERY,
 } from 'constants';
 
 import { FavoritesLayerBuilder, MapQueryLayerBuilder, CurrentLayerBuilder } from '../mapLayers';
 
 export default class Map {
-  constructor(events) {
+  constructor(root, events) {
+    this.parent = getEl(root, '[data-root="home"]');
+
     events.on('setHomeView', this.render);
     events.on('setCurrentLocation', this.#renderCurrentLocation);
     events.on('setMapQuery', this.#renderMapQuery);
@@ -24,45 +30,47 @@ export default class Map {
 
   #map;
 
-  bindMapClick = callback => {
-    this.#map.on('click', e => {
-      callback(e.latlng);
-    });
-
-    return this;
-  };
-
   render = state => {
     this.#resetMap().#createMap();
 
-    if (state.hasCurrentLocation) this.#loadCurrentLayer(state.currentLocation.coords);
-    if (state.favorites.length) this.#loadFavoritesLayer(state.favorites);
+    if (state.hasCurrentLocation) this.#loadLayer(CURRENT, state.currentLocation);
+    if (state.favorites.length) this.#loadLayer(FAVORITES, state.favorites);
   };
 
   #renderCurrentLocation = state => {
     if (this.mapQueryLayerBuilder) this.mapQueryLayerBuilder.resetLayer(this.#map);
 
     this.currentLayerBuilder = new CurrentLayerBuilder();
-    this.currentLayerBuilder.loadLayer(state.currentLocation.coords, this.#map);
+    this.#loadLayer(CURRENT, state.currentLocation);
   };
 
   #renderMapQuery = state => {
-    if (!this.mapQueryLayerBuilder) this.mapQueryLayerBuilder = new MapQueryLayerBuilder();
+    if (!this.mapQueryLayerBuilder)
+      this.mapQueryLayerBuilder = new MapQueryLayerBuilder(this.parent);
 
     this.mapQueryLayerBuilder.resetLayer(this.#map);
-    this.mapQueryLayerBuilder.loadLayer(state.currentSearch.coords, this.#map);
+    this.#loadLayer(MAP_QUERY, state.currentSearch);
   };
 
-  #loadFavoritesLayer = favorites => {
-    if (!this.favoritesLayerBuilder) this.favoritesLayerBuilder = new FavoritesLayerBuilder();
+  #loadLayer = (layer, payload) => {
+    switch (layer) {
+      case CURRENT:
+        this.currentLayerBuilder.loadLayer(payload, this.#map);
+        break;
+      case MAP_QUERY:
+        this.mapQueryLayerBuilder.loadLayer(payload, this.#map);
+        break;
+      case FAVORITES:
+        if (!this.favoritesLayerBuilder) this.favoritesLayerBuilder = new FavoritesLayerBuilder();
 
-    setTimeout(() => {
-      this.favoritesLayerBuilder.loadLayer(favorites, this.#map);
-    }, 100);
-  };
-
-  #loadCurrentLayer = coords => {
-    this.currentLayerBuilder.loadLayer(coords, this.#map);
+        setTimeout(() => {
+          this.favoritesLayerBuilder.loadLayer(payload, this.#map);
+        }, 100);
+        break;
+      default:
+        return 'Layer not found';
+    }
+    return this;
   };
 
   #createMap(coords = MAP_DEFAULT_COORDS) {
@@ -91,5 +99,26 @@ export default class Map {
         crossOrigin: true,
       },
     ).addTo(this.#map);
+  };
+
+  bindMapClick = callback => {
+    this.#map.on('click', e => {
+      callback(e.latlng);
+    });
+
+    return this;
+  };
+
+  bindMapQueryGetReport = callback => {
+    const getReportCallback = event => {
+      this.parent.removeEventListener('click', getReportCallback);
+
+      const getReportBtn = event.target.closest("[data-btn='mapQuery']");
+      if (!getReportBtn) return;
+
+      callback();
+    };
+
+    this.parent.addEventListener('click', getReportCallback);
   };
 }

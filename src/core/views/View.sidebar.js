@@ -31,6 +31,16 @@ export default class Sidebar {
     return this;
   };
 
+  bindFavTagClick = callback => {
+    this.parent.addEventListener('click', event => {
+      const favTagElement = event.target.closest('[data-btn="favorite-tag"]');
+      if (!favTagElement) return;
+
+      const { tag } = favTagElement.dataset;
+      callback(tag);
+    });
+  };
+
   #removeLastChild = () => {
     if (this.parent.lastElementChild) this.parent.removeChild(this.parent.lastElementChild);
     return this;

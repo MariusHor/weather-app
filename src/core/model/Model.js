@@ -1,5 +1,5 @@
 import { fetchSingle, fetchMultiple } from 'utils/helpers';
-import { API_WEATHER_URI, API_GEOCODE_URI } from 'constants';
+import { API_WEATHER_URI } from 'constants';
 
 export default class Model {
   constructor(events, geolocation) {
@@ -27,15 +27,18 @@ export default class Model {
       const data = await fetchSingle(url);
 
       const { lat, lon } = data[0];
-      this.saveCurrentSearch({ coords: { lat, lon } });
+
+      this.buffer = { lat, lon };
+
+      return this.buffer;
     } catch (error) {
       console.log(error);
       throw error;
     }
   };
 
-  getWeatherInfo = async () => {
-    const { lat, lon } = this.state.currentSearch.coords;
+  getWeatherReport = async coords => {
+    const { lat, lon } = coords;
 
     const weatherUrls = [
       `${API_WEATHER_URI}data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
@@ -45,13 +48,9 @@ export default class Model {
     try {
       const data = await fetchMultiple(weatherUrls);
 
-      this.saveCurrentSearch({
-        currentWeather: data[0],
-        forecast: {
-          results: data[1].list.slice(0, 8),
-          timezone: data[1].city.timezone,
-        },
-      });
+      this.buffer = data;
+
+      return this.buffer;
     } catch (error) {
       console.log(error);
       throw error;
@@ -62,18 +61,19 @@ export default class Model {
     try {
       const { lat, lon } = userPosition;
 
-      const url = `${API_GEOCODE_URI}data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+      const url = `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
       const data = await fetchSingle(url);
 
-      const { city, locality, countryCode } = data;
+      const { name, country } = data[0];
 
-      if (!city || !locality) throw Error('No weather report for this location. Try another one');
+      if (!name) throw Error('No weather report for this location. Try another one');
 
-      this.positionData = {
-        locality: city || locality,
-        country: countryCode,
+      this.buffer = {
+        locality: name,
+        country,
       };
-      return this.positionData;
+
+      return this.buffer;
     } catch (error) {
       console.error(error);
       throw error;
@@ -108,6 +108,41 @@ export default class Model {
   getCurrentView = () => this.state.activeView;
 
   getFavorites = () => this.state.favorites;
+
+  getFavoritesWeatherReport = async favorites => {
+    const updatedFavorites = await Promise.all(
+      favorites.map(async favorite => {
+        const weatherReport = await this.getWeatherReport(favorite.coords);
+        return {
+          ...favorite,
+          weatherReport,
+        };
+      }),
+    );
+
+    return updatedFavorites;
+  };
+
+  updateFavWeatherReport = async favorites => {
+    const updatedFavorites = await this.getFavoritesWeatherReport(favorites);
+
+    this.state = {
+      ...this.state,
+      favorites: updatedFavorites,
+    };
+  };
+
+  updateCurrLocationWeatherReport = async location => {
+    const weatherReport = await this.getWeatherReport(location.coords);
+
+    this.state = {
+      ...this.state,
+      currentLocation: {
+        ...this.state.currentLocation,
+        weatherReport,
+      },
+    };
+  };
 
   saveFavorite = () => {
     try {
@@ -183,7 +218,7 @@ export default class Model {
         forecast: null,
       },
     };
-
+    console.log(this.state);
     return this;
   };
 

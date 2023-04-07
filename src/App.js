@@ -14,24 +14,39 @@ export default class App {
 
   handleFormSubmit = async input => {
     try {
-      await this.model.getCoords(input);
-      await this.model.getWeatherInfo();
+      const coords = await this.model.getCoords(input);
+      const weatherReport = await this.model.getWeatherReport(coords);
 
       this.model
+        .saveCurrentSearch({
+          coords,
+          currentWeather: weatherReport[0],
+          forecast: {
+            results: weatherReport[1].list.slice(0, 8),
+            timezone: weatherReport[1].city.timezone,
+          },
+        })
         .saveActiveView('report')
         .saveInputValue('')
         .saveHistory()
         .dispatchState('setReportView');
 
       this.main.bindFavoriteBtnClick(this.handleFavoriteSubmit);
+
+      window.history.pushState({}, '', `#${input}`);
     } catch (error) {
       console.log(error);
     }
   };
 
-  handleHomeBtnClick = () => {
+  handleHomeBtnClick = async () => {
     const currentView = this.model.getCurrentView();
     if (currentView === 'home') return;
+
+    const { currentLocation, hasCurrentLocation, favorites } = this.model.state;
+
+    if (favorites.length) await this.model.updateFavWeatherReport(favorites);
+    if (hasCurrentLocation) await this.model.updateCurrLocationWeatherReport(currentLocation);
 
     this.model
       .saveActiveView('home')
@@ -40,14 +55,24 @@ export default class App {
       .dispatchState('setHomeView');
 
     this.map.bindMapClick(this.handleMapClick);
+    this.side.bindFavTagClick(this.handleFavTagClick);
+
+    window.history.pushState('', document.title, window.location.pathname);
   };
 
   handlePositionBtnClick = async () => {
     try {
       const currentLocation = await this.model.getCurrentLocation();
+      const weatherReport = await this.model.getWeatherReport(currentLocation.coords);
 
       this.model
-        .saveCurrentLocation({ hasCurrentLocation: true, currentLocation })
+        .saveCurrentLocation({
+          hasCurrentLocation: true,
+          currentLocation: {
+            ...currentLocation,
+            weatherReport,
+          },
+        })
         .saveInputValue(`${currentLocation.name.locality}, ${currentLocation.name.country}`)
         .dispatchState('setCurrentLocation');
     } catch (error) {
@@ -64,6 +89,8 @@ export default class App {
         .saveCurrentSearch({ coords: { lat, lon } })
         .saveInputValue(`${locationData.locality}, ${locationData.country}`)
         .dispatchState('setMapQuery');
+
+      this.map.bindMapQueryGetReport(this.handleMapQueryGetReport);
     } catch (error) {
       console.log(error);
     }
@@ -81,29 +108,49 @@ export default class App {
     }
   };
 
+  handleFavTagClick = tag => {
+    const queryInput = tag.slice(1);
+    this.handleFormSubmit(queryInput);
+  };
+
   handleFocusBtnClick = () => {
     this.header.focusSearchInput();
   };
 
-  initListeners = () => {
+  handleMapQueryGetReport = () => {
+    this.header.submitForm();
+  };
+
+  renderPageFromHash = async () => {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      await this.handleFormSubmit(hash);
+    }
+  };
+
+  initListeners = activeView => {
     this.header
       .bindPositionBtnClick(this.handlePositionBtnClick)
       .bindFormSubmit(this.handleFormSubmit)
       .bindHomeBtnClick(this.handleHomeBtnClick);
 
     this.side.bindFocusBtnClick(this.handleFocusBtnClick);
-    this.map.bindMapClick(this.handleMapClick);
+
+    if (activeView === 'home') this.map.bindMapClick(this.handleMapClick);
   };
 
-  mount() {
+  mount = async () => {
+    await this.renderPageFromHash();
+
     const state = this.model.getState();
 
     this.header.render(state);
     this.main.render(state);
-    this.map.render(state);
     this.side.render(state);
     this.footer.render(state);
 
-    this.initListeners();
-  }
+    if (state.activeView === 'home') this.map.render(state);
+
+    this.initListeners(state.activeView);
+  };
 }
