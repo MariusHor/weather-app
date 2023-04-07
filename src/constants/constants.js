@@ -1,9 +1,5 @@
 import L from 'leaflet';
 
-export const CURRENT = 'current';
-export const HOME = 'home';
-export const FAVORITE = 'favorite';
-
 export const MAP_SELECTOR = 'map';
 
 export const API_MAPTILER_URI = 'https://api.maptiler.com/';
@@ -18,6 +14,7 @@ export const MARKER_SHADOW_URL =
 export const MAX_FAV_COUNT = 3;
 export const MAP_MAX_VISCOSITY = 0.8;
 export const MAP_MAX_ZOOM = 1;
+export const MAP_DEFAULT_COORDS = [50, 20];
 
 export const MAP_MAX_BOUNDS = new L.LatLngBounds(new L.LatLng(-70, -180), new L.LatLng(180, 190));
 export const MARKER_ICON_PARAMS = {

@@ -1,4 +1,4 @@
-import { formatTime, round } from '../utils/helpers';
+import { formatTime, round } from 'utils/helpers';
 
 const WeatherInfoCard = payload => {
   const weatherIconSrc = `https://openweathermap.org/img/wn/${payload.weather.icon}@2x.png`;

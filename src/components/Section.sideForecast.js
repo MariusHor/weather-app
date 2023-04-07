@@ -1,6 +1,6 @@
 import ForecastCard from './Card.forecast';
 
-const ForecastPanel = payload => ` 
+const SideForecast = payload => ` 
         <div class="flex flex-col items-center justify-center gap-6 text-slate-200">
             <div class="flex flex-col items-center">
                 <h3 class="text-2xl">Forecast</h3>
@@ -14,4 +14,4 @@ const ForecastPanel = payload => `
         </div>
     `;
 
-export default ForecastPanel;
+export default SideForecast;

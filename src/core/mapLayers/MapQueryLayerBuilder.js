@@ -1,18 +1,20 @@
 import L from 'leaflet';
-import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from '../constants/constants';
+import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from 'constants';
 import Layer from './Layer';
 
-export default class HomeLayer extends Layer {
-  createMarker() {
-    const greenIcon = new L.Icon({
-      iconUrl: `${MARKER_ICON_URI}marker-icon-2x-green.png`,
+export default class MapQueryLayerBuilder extends Layer {
+  createMarker = (coords, map) => {
+    const { lat, lon } = coords;
+
+    const blueIcon = new L.Icon({
+      iconUrl: `${MARKER_ICON_URI}marker-icon-2x-blue.png`,
       shadowUrl: MARKER_SHADOW_URL,
       ...MARKER_ICON_PARAMS,
     });
 
-    this.marker = L.marker(this.coords, {
+    this.marker = L.marker([lat, lon], {
       opacity: 0.8,
-      icon: greenIcon,
+      icon: blueIcon,
     })
       .bindPopup(
         L.popup({
@@ -35,9 +37,11 @@ export default class HomeLayer extends Layer {
       })
       .openPopup();
 
-    this.map.on('click', () => {
+    map.on('click', () => {
       this.marker.setOpacity(0.4);
       this.marker.closePopup();
     });
-  }
+
+    return this.marker;
+  };
 }

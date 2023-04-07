@@ -8,16 +8,21 @@
     ]
   ],
   "plugins": [
-      ["babel-plugin-module-resolver", {
+    [
+      "babel-plugin-module-resolver",
+      {
         "alias": {
           "": "./src",
-          "@assets": "./src/assets",
-          "@components": "./src/components",
-          "@containers": "./src/containers",
-          "@constants": "./src/constants",
-          "@styles": "./src/styles",
-          "@utils": "./src/utils"
+          "actions": "./src/actions",
+          "assets": "./src/assets",
+          "components": "./src/components",
+          "core": "./src/core",
+          "containers": "./src/containers",
+          "constants": "./src/constants",
+          "styles": "./src/styles",
+          "utils": "./src/utils"
         }
-      }]
+      }
     ]
+  ]
 }

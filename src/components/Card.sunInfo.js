@@ -1,4 +1,4 @@
-import { formatTime } from '../utils/helpers';
+import { formatTime } from 'utils/helpers';
 
 const SunInfoCard = (className, { seconds, timezone }) => `
         <div class="${className} h-full w-full rounded-lg bg-slate-200 overflow-hidden">
