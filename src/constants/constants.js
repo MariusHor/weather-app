@@ -3,7 +3,7 @@ import L from 'leaflet';
 export const MAP_SELECTOR = 'map';
 
 export const API_MAPTILER_URI = 'https://api.maptiler.com/';
-export const API_WEATHER_URI = 'http://api.openweathermap.org/';
+export const API_WEATHER_URI = 'https://api.openweathermap.org/';
 export const API_GEOCODE_URI = 'https://api.bigdatacloud.net/';
 
 export const MARKER_ICON_URI =
