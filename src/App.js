@@ -1,150 +1,109 @@
-import Home from './views/View.home';
-import Sidebar from './views/View.sidebar';
-import Footer from './views/View.footer';
-import Model from './Model';
-import Map from './Map';
-import Geolocation from './Geolocation';
-
 import './App.scss';
-import { MAX_FAV_COUNT } from './constants/constants';
+import { MAX_FAV_COUNT } from 'constants/constants';
 
 export default class App {
-  constructor(root) {
-    this.home = new Home(root);
-    this.sidebar = new Sidebar(root);
-    this.footer = new Footer(root);
+  constructor(views, model) {
+    this.header = views.header;
+    this.main = views.main;
+    this.map = views.map;
+    this.side = views.side;
+    this.footer = views.footer;
 
-    this.model = new Model();
-    this.map = new Map();
-    this.geolocation = new Geolocation();
+    this.model = model;
   }
 
   handleFormSubmit = async input => {
     try {
-      if (!this.model.state.currentSearch) {
-        await this.model.getCoords(input);
-        await this.model.getWeatherInfo();
-      }
+      await this.model.getCoords(input);
+      await this.model.getWeatherInfo();
 
-      this.home
-        .removeLastChild()
-        .render(
-          this.model.state.currentSearch.currentWeather,
-          this.handleFavoriteBtnClick,
-          this.handleFavoriteSubmit,
-        );
+      this.model
+        .saveActiveView('report')
+        .saveInputValue('')
+        .saveHistory()
+        .dispatchState('setReportView');
 
-      const { forecast } = this.model.state.currentSearch;
+      this.main.bindFavoriteBtnClick(this.handleFavoriteSubmit);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-      this.sidebar.removeLastChild().render({ forecast });
-      this.model.saveHistory();
-      this.home.disablePositionBtn();
+  handleHomeBtnClick = () => {
+    const currentView = this.model.getCurrentView();
+    if (currentView === 'home') return;
+
+    this.model
+      .saveActiveView('home')
+      .saveInputValue('')
+      .resetNotificationCount()
+      .dispatchState('setHomeView');
+
+    this.map.bindMapClick(this.handleMapClick);
+  };
+
+  handlePositionBtnClick = async () => {
+    try {
+      const currentLocation = await this.model.getCurrentLocation();
+
+      this.model
+        .saveCurrentLocation({ hasCurrentLocation: true, currentLocation })
+        .saveInputValue(`${currentLocation.name.locality}, ${currentLocation.name.country}`)
+        .dispatchState('setCurrentLocation');
     } catch (error) {
       console.log(error);
     }
   };
 
   handleMapClick = async coords => {
-    const { lat, lng } = coords;
-
     try {
-      this.model.saveCurrentSearch({ coords: { lat, lon: lng } });
-      await this.model.getWeatherInfo();
+      const { lat, lng: lon } = coords;
+      const locationData = await this.model.getPositionData({ lat, lon });
 
-      const positionData = this.model.getPositionData();
-
-      if (!positionData.locality) return; // Display NOT FOUND message
-
-      this.map.setCurrentMarker({
-        coords: {
-          latitude: lat,
-          longitude: lng,
-        },
-      });
-      this.home.setSearchInputValue(positionData).focusSearchInput();
+      this.model
+        .saveCurrentSearch({ coords: { lat, lon } })
+        .saveInputValue(`${locationData.locality}, ${locationData.country}`)
+        .dispatchState('setMapQuery');
     } catch (error) {
       console.log(error);
     }
   };
 
-  handlePositionBtnClick = async () => {
+  handleFavoriteSubmit = () => {
     try {
-      await this.geolocation.checkGelocationPermission();
+      const favorites = this.model.getFavorites();
 
-      const userPosition = await Geolocation.getUserPosition();
+      if (favorites.length >= MAX_FAV_COUNT) throw Error('Maximum saved favorites reached');
 
-      const { latitude: lat, longitude: lon } = userPosition.coords;
-      this.model.saveCurrentSearch({ coords: { lat, lon } });
-
-      await this.model.getWeatherInfo();
-      const positionData = this.model.getPositionData();
-
-      this.map.setHomeMarker(userPosition);
-      this.home.disablePositionBtn().setSearchInputValue(positionData).focusSearchInput();
+      this.model.increaseNotificationCount().saveFavorite().dispatchState('setFavorites');
     } catch (error) {
       console.log(error);
     }
   };
 
   handleFocusBtnClick = () => {
-    this.home.focusSearchInput();
-  };
-
-  handleFavoriteSubmit = favoriteTag => {
-    try {
-      let favorites = this.model.getFavorites();
-      if (favorites.length >= MAX_FAV_COUNT) throw Error('Maximum saved favorites reached');
-
-      this.model.saveFavorite(favoriteTag);
-
-      this.home.renderSavedFeedback();
-
-      favorites = this.model.getFavorites();
-      this.footer.render(favorites.length);
-    } catch (error) {
-      this.home.renderSavedFeedback(error);
-    } finally {
-      this.home.hideFavoriteInput();
-    }
-  };
-
-  handleFavoriteBtnClick = () => {
-    const positionData = this.model.getLastLocationSearch();
-    this.home.revealFavInput(positionData);
-  };
-
-  handleHomeBtnClick = () => {
-    const favorites = this.model.getFavorites();
-
-    this.home.removeLastChild().render();
-    this.sidebar.removeLastChild().render({ favorites });
-    this.map.loadMap().bindMapClick(this.handleMapClick);
-
-    if (this.map.homeCoords) {
-      this.map.setHomeMarker();
-    }
+    this.header.focusSearchInput();
   };
 
   initListeners = () => {
-    this.home
+    this.header
       .bindPositionBtnClick(this.handlePositionBtnClick)
       .bindFormSubmit(this.handleFormSubmit)
       .bindHomeBtnClick(this.handleHomeBtnClick);
 
-    this.sidebar.bindFocusBtnClick(this.handleFocusBtnClick);
+    this.side.bindFocusBtnClick(this.handleFocusBtnClick);
     this.map.bindMapClick(this.handleMapClick);
   };
 
   mount() {
-    const { home, sidebar, footer, map, initListeners } = this;
+    const state = this.model.getState();
 
-    const favorites = this.model.getFavorites();
+    this.header.render(state);
+    this.main.render(state);
+    this.map.render(state);
+    this.side.render(state);
+    this.footer.render(state);
 
-    home.render();
-    footer.render(favorites.length);
-    sidebar.render({ favorites });
-    map.loadMap();
-
-    initListeners();
+    this.initListeners();
   }
 }

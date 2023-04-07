@@ -1,6 +1,8 @@
 export default class Geolocation {
   #permission;
 
+  #position;
+
   async checkGelocationPermission() {
     try {
       this.#permission = await navigator.permissions.query({ name: 'geolocation' });
@@ -13,9 +15,15 @@ export default class Geolocation {
     }
   }
 
-  static getUserPosition() {
-    return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject);
-    });
+  async getUserPosition() {
+    try {
+      this.#position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      return this.#position;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }

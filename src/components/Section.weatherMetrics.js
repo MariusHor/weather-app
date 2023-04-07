@@ -1,8 +1,8 @@
+import { round } from 'utils/helpers';
 import WeatherMetric from './Card.weatherMetric';
-import { round } from '../utils/helpers';
 
 const WeatherMetrics = payload => `
-        <div class="flex justify-between items-end gap-2">
+        <div class="flex justify-center flex-wrap gap-2">
             ${WeatherMetric({
               title: 'Feels like',
               stat: `${round(payload.feels_like)}<span>&#176;</span>`,
