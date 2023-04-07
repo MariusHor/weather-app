@@ -61,7 +61,7 @@ export default class Model {
     try {
       const { lat, lon } = userPosition;
 
-      const url = `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
+      const url = `${API_WEATHER_URI}geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
       const data = await fetchSingle(url);
 
       const { name, country } = data[0];
