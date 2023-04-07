@@ -54,6 +54,10 @@ export default class Header {
     return this;
   };
 
+  submitForm = () => {
+    this.form.dispatchEvent(new Event('submit'));
+  };
+
   focusSearchInput = () => {
     this.input.focus();
   };

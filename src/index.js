@@ -16,7 +16,7 @@ const appViews = {
   main: new views.Main(root, events),
   footer: new views.Footer(root, events),
   side: new views.Side(root, events),
-  map: new views.Map(events),
+  map: new views.Map(root, events),
 };
 
 const app = new App(appViews, model);

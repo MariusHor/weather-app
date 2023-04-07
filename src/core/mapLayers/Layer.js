@@ -1,6 +1,11 @@
 import L from 'leaflet';
+import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from 'constants';
 
 export default class Layer {
+  constructor(parent) {
+    this.parent = parent;
+  }
+
   static create = () => {
     const layer = L.layerGroup();
     return layer;
@@ -23,59 +28,23 @@ export default class Layer {
     if (this.layer) map.removeLayer(this.layer);
     this.layer = null;
   };
+
+  initListeners = map => {
+    map.on('click', () => {
+      if (this.popupTimeout) clearTimeout(this.popupTimeout);
+
+      this.marker.setOpacity(0.4);
+      this.marker.closePopup();
+    });
+  };
+
+  getMarkerIcon = color => {
+    this.markerIcon = new L.Icon({
+      iconUrl: `${MARKER_ICON_URI}marker-icon-2x-${color}.png`,
+      shadowUrl: MARKER_SHADOW_URL,
+      ...MARKER_ICON_PARAMS,
+    });
+
+    return this.markerIcon;
+  };
 }
-
-// marker;
-
-// markers = [];
-
-// coords;
-
-// layer;
-
-// createLayer = () => {
-//   this.layer = L.layerGroup();
-// };
-
-// createClusterLayer = () => {
-//   this.layer = L.markerClusterGroup({});
-// };
-
-// loadLayer(map) {
-//   map.addLayer(this.layer);
-//   return this;
-// }
-
-// resetLayer() {
-//   this.map.removeLayer(this.layer);
-//   this.layer = null;
-
-//   return this;
-// }
-
-// resetMarkers() {
-//   this.marker = null;
-//   this.markers = [];
-
-//   return this;
-// }
-
-// mount = map => {
-//   this.map = map;
-
-//   if (!this.layer) {
-//     this.createLayer();
-//   }
-//   if (this.marker) this.layer.removeLayer(this.marker);
-
-//   this.createMarker();
-//   this.layer.addLayer(this.marker);
-//   this.map.addLayer(this.layer);
-// };
-
-// storeCoords = position => {
-//   const { lat, lon } = position.coords;
-//   this.coords = [lat, lon];
-
-//   return this;
-// };

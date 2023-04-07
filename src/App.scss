@@ -48,10 +48,8 @@ body {
   width: 100%;
 }
 
-.leaflet-pane {
-  img {
-    position: absolute;
-  }
+.leaflet-container a.leaflet-popup-close-button {
+  color: white;
 }
 
 .leaflet-control-container {
@@ -89,6 +87,14 @@ body {
   height: 100%;
 }
 
+.cta {
+  transition: all 0.3s ease-in-out;
+}
+
+.cta:hover {
+  color: white;
+}
+
 .reveal-input {
   opacity: 0;
   transition: opacity 0.5s;
@@ -117,4 +123,13 @@ body {
 .sunset {
   min-height: 140px;
   max-width: 250px;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: rgb(23 37 84);
+  color: white;
+}
+
+.leaflet-popup-tip {
+  background-color: rgb(23 37 84);
 }

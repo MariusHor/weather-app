@@ -1,46 +1,52 @@
 import L from 'leaflet';
-import { MARKER_ICON_PARAMS, MARKER_ICON_URI, MARKER_SHADOW_URL } from 'constants';
+import { GREEN } from 'constants';
+import { MapPopup } from 'components';
 import Layer from './Layer';
 
 export default class CurrentLayerbuilder extends Layer {
-  createMarker = (coords, map) => {
-    const { lat, lon } = coords;
+  markerIcon;
 
-    const greenIcon = new L.Icon({
-      iconUrl: `${MARKER_ICON_URI}marker-icon-2x-green.png`,
-      shadowUrl: MARKER_SHADOW_URL,
-      ...MARKER_ICON_PARAMS,
-    });
+  marker;
+
+  popupTimeout;
+
+  createMarker = (location, map) => {
+    const { lat, lon } = location.coords;
+    const { temp } = location.weatherReport[0].main;
+    const weatherIcon = location.weatherReport[0].weather[0].icon;
 
     this.marker = L.marker([lat, lon], {
       opacity: 0.8,
-      icon: greenIcon,
+      icon: this.getMarkerIcon(GREEN),
     })
       .bindPopup(
         L.popup({
           maxWidth: 200,
-          minWidth: 100,
+          minWidth: 80,
           autoClose: false,
           closeOnClick: false,
           className: 'current-position-popup',
         }),
       )
-      .setPopupContent('Home!')
+      .setPopupContent(MapPopup(temp, weatherIcon))
       .on('click', () => {
+        if (this.popupTimeout) clearTimeout(this.popupTimeout);
         this.marker.setOpacity(0.8);
       })
       .on('mouseover ', () => {
+        if (this.popupTimeout) clearTimeout(this.popupTimeout);
+        this.marker.setOpacity(0.8);
         this.marker.openPopup();
       })
       .on('mouseout ', () => {
-        this.marker.closePopup();
+        this.popupTimeout = setTimeout(() => {
+          this.marker.setOpacity(0.4);
+          this.marker.closePopup();
+        }, 2000);
       })
       .openPopup();
 
-    map.on('click', () => {
-      this.marker.setOpacity(0.4);
-      this.marker.closePopup();
-    });
+    this.initListeners(map);
 
     return this.marker;
   };

@@ -23,9 +23,7 @@ export default class Main {
   };
 
   bindFavoriteBtnClick = callback => {
-    this.favoriteBtn.addEventListener('click', () => {
-      callback();
-    });
+    this.favoriteBtn.addEventListener('click', callback);
     return this;
   };
 

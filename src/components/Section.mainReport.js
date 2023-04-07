@@ -17,7 +17,7 @@ const MainReport = payload => {
 
   return `
     <div class="h-full w-full flex flex-col items-center justify-center">
-      <h1 class="text-slate-200 text-2xl">Weather in <span class="text-amber-600">${
+      <h1 class="text-slate-200 text-2xl text-center">Weather in <span class="text-amber-600">${
         weatherData.location
       }</span></h1>
       <div class="h-full w-full flex flex-col lg:flex-row lg:max-h-80 items-center justify-center gap-5 p-4 ">
