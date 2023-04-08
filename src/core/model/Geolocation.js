@@ -20,6 +20,9 @@ export default class Geolocation {
       this.#position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject);
       });
+
+      if (!this.#position) throw Error('Could not get current position');
+
       return this.#position;
     } catch (error) {
       console.log(error);

@@ -6,7 +6,8 @@ export default class Header {
     this.input = getEl(this.parent, '[data-input="search"]');
     this.form = getEl(this.parent, '[data-form="search"]');
     this.positionBtn = getEl(this.parent, '[data-btn="position"]');
-    this.homeBtn = getEl(this.parent, '[data-btn="home"]');
+    this.homeBtn = getEl(this.parent, '[data-btn="home-header"]');
+    this.errorFeedbackEl = getEl(this.parent, '[data-feedback="error"]');
 
     this.notificationManager = notificationManager;
 
@@ -52,6 +53,18 @@ export default class Header {
       callback(this.input.value);
     });
     return this;
+  };
+
+  renderErrorFeedback = message => {
+    this.errorFeedbackEl.textContent = message;
+    this.errorFeedbackEl.classList.toggle('opacity-0');
+    this.errorFeedbackEl.classList.toggle('opacity-100');
+
+    setTimeout(() => {
+      this.errorFeedbackEl.textContent = '';
+      this.errorFeedbackEl.classList.toggle('opacity-0');
+      this.errorFeedbackEl.classList.toggle('opacity-100');
+    }, 2000);
   };
 
   submitForm = () => {

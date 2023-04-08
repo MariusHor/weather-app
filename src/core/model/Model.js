@@ -26,6 +26,8 @@ export default class Model {
       const url = `${API_WEATHER_URI}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
       const data = await fetchSingle(url);
 
+      if (!data.length) throw Error('Location not found. Please check your spelling!');
+
       const { lat, lon } = data[0];
 
       this.buffer = { lat, lon };
@@ -48,6 +50,8 @@ export default class Model {
     try {
       const data = await fetchMultiple(weatherUrls);
 
+      if (!data.length) throw Error('Could not get weather report. Please try again!');
+
       this.buffer = data;
 
       return this.buffer;
@@ -64,9 +68,11 @@ export default class Model {
       const url = `${API_WEATHER_URI}geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
       const data = await fetchSingle(url);
 
+      if (!data.length) throw Error('Location not found. Try another one');
+
       const { name, country } = data[0];
 
-      if (!name) throw Error('No weather report for this location. Try another one');
+      if (!name) throw Error('Location not found. Try another one');
 
       this.buffer = {
         locality: name,
@@ -109,38 +115,49 @@ export default class Model {
 
   getFavorites = () => this.state.favorites;
 
-  getFavoritesWeatherReport = async favorites => {
-    const updatedFavorites = await Promise.all(
-      favorites.map(async favorite => {
-        const weatherReport = await this.getWeatherReport(favorite.coords);
-        return {
-          ...favorite,
-          weatherReport,
-        };
-      }),
-    );
-
-    return updatedFavorites;
-  };
-
   updateFavWeatherReport = async favorites => {
-    const updatedFavorites = await this.getFavoritesWeatherReport(favorites);
+    try {
+      const updatedFavorites = await Promise.all(
+        favorites.map(async favorite => {
+          const weatherReport = await this.getWeatherReport(favorite.coords);
+          return {
+            ...favorite,
+            weatherReport,
+          };
+        }),
+      );
 
-    this.state = {
-      ...this.state,
-      favorites: updatedFavorites,
-    };
+      this.state = {
+        ...this.state,
+        favorites: updatedFavorites,
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   };
 
   updateCurrLocationWeatherReport = async location => {
-    const weatherReport = await this.getWeatherReport(location.coords);
+    try {
+      const weatherReport = await this.getWeatherReport(location.coords);
 
+      this.state = {
+        ...this.state,
+        currentLocation: {
+          ...this.state.currentLocation,
+          weatherReport,
+        },
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  saveErrorMessage = message => {
     this.state = {
       ...this.state,
-      currentLocation: {
-        ...this.state.currentLocation,
-        weatherReport,
-      },
+      errorMessage: message,
     };
   };
 
@@ -218,7 +235,7 @@ export default class Model {
         forecast: null,
       },
     };
-    console.log(this.state);
+
     return this;
   };
 

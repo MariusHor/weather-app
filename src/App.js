@@ -14,6 +14,8 @@ export default class App {
 
   handleFormSubmit = async input => {
     try {
+      this.main.showLoader();
+
       const coords = await this.model.getCoords(input);
       const weatherReport = await this.model.getWeatherReport(coords);
 
@@ -31,33 +33,41 @@ export default class App {
         .saveHistory()
         .dispatchState('setReportView');
 
-      this.main.bindFavoriteBtnClick(this.handleFavoriteSubmit);
+      this.main
+        .bindFavoriteBtnClick(this.handleFavoriteSubmit)
+        .bindCopyUrlClick(this.handleCopyUrlClick);
 
       window.history.pushState({}, '', `#${input}`);
     } catch (error) {
-      console.log(error);
+      this.renderErrorFeedback(error.message);
     }
   };
 
   handleHomeBtnClick = async () => {
-    const currentView = this.model.getCurrentView();
-    if (currentView === 'home') return;
+    try {
+      const currentView = this.model.getCurrentView();
+      if (currentView === 'home') return;
 
-    const { currentLocation, hasCurrentLocation, favorites } = this.model.state;
+      this.main.showLoader();
 
-    if (favorites.length) await this.model.updateFavWeatherReport(favorites);
-    if (hasCurrentLocation) await this.model.updateCurrLocationWeatherReport(currentLocation);
+      const { currentLocation, hasCurrentLocation, favorites } = this.model.state;
 
-    this.model
-      .saveActiveView('home')
-      .saveInputValue('')
-      .resetNotificationCount()
-      .dispatchState('setHomeView');
+      if (favorites.length) await this.model.updateFavWeatherReport(favorites);
+      if (hasCurrentLocation) await this.model.updateCurrLocationWeatherReport(currentLocation);
 
-    this.map.bindMapClick(this.handleMapClick);
-    this.side.bindFavTagClick(this.handleFavTagClick);
+      this.model
+        .saveActiveView('home')
+        .saveInputValue('')
+        .resetNotificationCount()
+        .dispatchState('setHomeView');
 
-    window.history.pushState('', document.title, window.location.pathname);
+      this.map.bindMapClick(this.handleMapClick);
+      this.side.bindFavTagClick(this.handleFavTagClick);
+
+      window.history.pushState('', document.title, window.location.pathname);
+    } catch (error) {
+      this.renderErrorFeedback(error.message);
+    }
   };
 
   handlePositionBtnClick = async () => {
@@ -76,7 +86,7 @@ export default class App {
         .saveInputValue(`${currentLocation.name.locality}, ${currentLocation.name.country}`)
         .dispatchState('setCurrentLocation');
     } catch (error) {
-      console.log(error);
+      this.renderErrorFeedback(error.message);
     }
   };
 
@@ -92,7 +102,7 @@ export default class App {
 
       this.map.bindMapQueryGetReport(this.handleMapQueryGetReport);
     } catch (error) {
-      console.log(error);
+      this.renderErrorFeedback(error.message);
     }
   };
 
@@ -104,7 +114,7 @@ export default class App {
 
       this.model.increaseNotificationCount().saveFavorite().dispatchState('setFavorites');
     } catch (error) {
-      console.log(error);
+      this.renderErrorFeedback(error.message);
     }
   };
 
@@ -121,11 +131,29 @@ export default class App {
     this.header.submitForm();
   };
 
+  handleCopyUrlClick = copyText => {
+    navigator.clipboard.writeText(copyText).then(
+      () => {
+        this.main.showCopyFeedback('success');
+      },
+      () => {
+        this.main.showCopyFeedback('error');
+      },
+    );
+  };
+
   renderPageFromHash = async () => {
     const hash = window.location.hash.substring(1);
     if (hash) {
       await this.handleFormSubmit(hash);
     }
+  };
+
+  renderErrorFeedback = message => {
+    this.model.saveActiveView('error').saveErrorMessage(message);
+    const state = this.model.getState();
+
+    this.main.render(state).bindHomeButtonClick(this.handleHomeBtnClick);
   };
 
   initListeners = activeView => {
@@ -135,6 +163,12 @@ export default class App {
       .bindHomeBtnClick(this.handleHomeBtnClick);
 
     this.side.bindFocusBtnClick(this.handleFocusBtnClick);
+
+    if (activeView === 'report') {
+      this.main
+        .bindFavoriteBtnClick(this.handleFavoriteSubmit)
+        .bindCopyUrlClick(this.handleCopyUrlClick);
+    }
 
     if (activeView === 'home') this.map.bindMapClick(this.handleMapClick);
   };
