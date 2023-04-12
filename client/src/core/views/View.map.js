@@ -3,18 +3,18 @@ import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet/dist/leaflet.css';
-import { getEl } from 'utils/helpers';
+import { getEl, fetchSingle } from 'utils/helpers';
 
 import {
   MAP_MAX_BOUNDS,
   MAP_MAX_VISCOSITY,
   MAP_MAX_ZOOM,
-  API_MAPTILER_URI,
   MAP_SELECTOR,
   MAP_DEFAULT_COORDS,
   CURRENT,
   FAVORITES,
   MAP_QUERY,
+  API_SERVER_URI,
 } from 'constants';
 
 import { FavoritesLayerBuilder, MapQueryLayerBuilder, CurrentLayerBuilder } from '../mapLayers';
@@ -89,16 +89,22 @@ export default class Map {
     return this;
   };
 
-  #createTileLayer = () => {
-    L.tileLayer(
-      `${API_MAPTILER_URI}maps/streets-v2/{z}/{x}/{y}.png?key=${process.env.MAP_TILER_KEY}`,
-      {
+  #createTileLayer = async () => {
+    const url = `${API_SERVER_URI}tileLayer`;
+    try {
+      const data = await fetchSingle(url);
+      const { tileLayerUrl } = data;
+
+      L.tileLayer(tileLayerUrl, {
         tileSize: 512,
         zoomOffset: -1,
         minZoom: 2,
         crossOrigin: true,
-      },
-    ).addTo(this.#map);
+      }).addTo(this.#map);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   };
 
   bindMapClick = callback => {

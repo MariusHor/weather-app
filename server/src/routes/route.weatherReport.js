@@ -4,7 +4,7 @@ import {
   getCoordinates,
   getPositionName,
   getWeatherReport,
-} from "./controller.js";
+} from "../controllers/controller.weatherReport.js";
 
 router.route("/coords/:query").get(getCoordinates);
 router.route("/positionName/:lat&:lon").get(getPositionName);
