@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 import { API_WEATHER_URI } from "./constants.js";
 
 export const fetchWeatherAPI = async (urlOptions) => {
