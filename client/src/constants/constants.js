@@ -9,7 +9,7 @@ export const GREEN = 'green';
 export const RED = 'red';
 
 export const API_MAPTILER_URI = 'https://api.maptiler.com/';
-export const API_WEATHER_URI = 'https://api.openweathermap.org/';
+export const API_SERVER_URI = `http://localhost:8000/`;
 
 export const MARKER_ICON_URI =
   'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';

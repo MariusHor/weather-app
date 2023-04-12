@@ -93,11 +93,11 @@ export default class App {
   handleMapClick = async coords => {
     try {
       const { lat, lng: lon } = coords;
-      const locationData = await this.model.getPositionData({ lat, lon });
+      const locationName = await this.model.getPositionName({ lat, lon });
 
       this.model
         .saveCurrentSearch({ coords: { lat, lon } })
-        .saveInputValue(`${locationData.locality}, ${locationData.country}`)
+        .saveInputValue(`${locationName.locality}, ${locationName.country}`)
         .dispatchState('setMapQuery');
 
       this.map.bindMapQueryGetReport(this.handleMapQueryGetReport);

@@ -1,5 +1,5 @@
-import { fetchSingle, fetchMultiple } from 'utils/helpers';
-import { API_WEATHER_URI } from 'constants';
+import { fetchSingle } from 'utils/helpers';
+import { API_SERVER_URI } from 'constants';
 
 export default class Model {
   constructor(events, geolocation) {
@@ -21,17 +21,11 @@ export default class Model {
     };
   }
 
-  getCoords = async (input = '') => {
+  getCoords = async query => {
+    const url = `${API_SERVER_URI}weatherReport/coords/${query}`;
+
     try {
-      const url = `${API_WEATHER_URI}geo/1.0/direct?q=${input}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
-      const data = await fetchSingle(url);
-
-      if (!data.length) throw Error('Location not found. Please check your spelling!');
-
-      const { lat, lon } = data[0];
-
-      this.buffer = { lat, lon };
-
+      this.buffer = await fetchSingle(url);
       return this.buffer;
     } catch (error) {
       console.log(error);
@@ -41,19 +35,10 @@ export default class Model {
 
   getWeatherReport = async coords => {
     const { lat, lon } = coords;
-
-    const weatherUrls = [
-      `${API_WEATHER_URI}data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
-      `${API_WEATHER_URI}data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`,
-    ];
+    const url = `${API_SERVER_URI}weatherReport/report/${lat}&${lon}`;
 
     try {
-      const data = await fetchMultiple(weatherUrls);
-
-      if (!data.length) throw Error('Could not get weather report. Please try again!');
-
-      this.buffer = data;
-
+      this.buffer = await fetchSingle(url);
       return this.buffer;
     } catch (error) {
       console.log(error);
@@ -61,24 +46,12 @@ export default class Model {
     }
   };
 
-  getPositionData = async userPosition => {
+  getPositionName = async coords => {
+    const { lat, lon } = coords;
+    const url = `${API_SERVER_URI}weatherReport/positionName/${lat}&${lon}`;
+
     try {
-      const { lat, lon } = userPosition;
-
-      const url = `${API_WEATHER_URI}geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5&appid=${process.env.WEATHER_API_KEY}`;
-      const data = await fetchSingle(url);
-
-      if (!data.length) throw Error('Location not found. Try another one');
-
-      const { name, country } = data[0];
-
-      if (!name) throw Error('Location not found. Try another one');
-
-      this.buffer = {
-        locality: name,
-        country,
-      };
-
+      this.buffer = await fetchSingle(url);
       return this.buffer;
     } catch (error) {
       console.error(error);
@@ -93,7 +66,7 @@ export default class Model {
       const userPosition = await this.geolocation.getUserPosition();
 
       const { latitude: lat, longitude: lon } = userPosition.coords;
-      const currentLocationName = await this.getPositionData({ lat, lon });
+      const currentLocationName = await this.getPositionName({ lat, lon });
 
       return {
         name: currentLocationName,

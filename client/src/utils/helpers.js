@@ -15,29 +15,12 @@ export const fetchSingle = async url => {
   try {
     const response = await fetch(url);
     const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
 
-export const fetchMultiple = async urls => {
-  try {
-    const responses = await Promise.all(
-      urls.map(url =>
-        fetch(url, {
-          cache: 'force-cache',
-          headers: {
-            'Cache-Control': 'public, max-age=600',
-          },
-        }),
-      ),
-    );
-    const data = await Promise.all(responses.map(response => response.json()));
+    if (!response.ok) throw new Error(data.message);
+
     return data;
   } catch (error) {
-    console.error(error);
-    return { error };
+    console.log(error.message);
+    throw error;
   }
 };
