@@ -15,9 +15,10 @@ export const MARKER_ICON_URI =
 export const MARKER_SHADOW_URL =
   'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png';
 
-export const MAX_FAV_COUNT = 3;
+export const MAX_FAV_COUNT = 8;
 export const MAP_MAX_VISCOSITY = 0.8;
-export const MAP_MAX_ZOOM = 1;
+export const MAP_INITIAL_ZOOM = 2;
+export const MAP_MAX_ZOOM = 15;
 export const MAP_DEFAULT_COORDS = [50, 20];
 
 export const MAP_MAX_BOUNDS = new L.LatLngBounds(new L.LatLng(-70, -180), new L.LatLng(180, 190));

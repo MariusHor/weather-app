@@ -10,6 +10,7 @@ import {
   MAP_MAX_VISCOSITY,
   MAP_MAX_ZOOM,
   MAP_SELECTOR,
+  MAP_INITIAL_ZOOM,
   MAP_DEFAULT_COORDS,
   CURRENT,
   FAVORITES,
@@ -65,7 +66,7 @@ export default class Map {
 
         setTimeout(() => {
           this.favoritesLayerBuilder.loadLayer(payload, this.#map);
-        }, 100);
+        }, 200);
         break;
       default:
         return 'Layer not found';
@@ -77,7 +78,8 @@ export default class Map {
     this.#map = L.map(MAP_SELECTOR, {
       maxBounds: MAP_MAX_BOUNDS,
       maxBoundsViscosity: MAP_MAX_VISCOSITY,
-    }).setView(coords, MAP_MAX_ZOOM);
+      maxZoom: MAP_MAX_ZOOM,
+    }).setView(coords, MAP_INITIAL_ZOOM);
 
     this.#createTileLayer();
 
