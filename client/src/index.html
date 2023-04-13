@@ -8,42 +8,39 @@
   </head>
   <body>
     <div class="overlay flex items-center justify-center h-full min-h-screen">
-      <div class="app flex flex-col w-full max-w-6xl shadow-xl h-fit rounded px-2 lg:px-5">
-        <div data-root="header">
-          <div class="flex gap-2 justify-center p-4 mt-4">
-            <button
-              class="overlay relative shadow-lg hover:shadow-blue-300/50 rounded p-2 w-11 min-h-full transition duration-250 ease-in-out text-slate-300"
-              data-btn="home-header"
-            >
-              <i class="fa-solid fa-house"></i>
-            </button>
+      <div class="app flex flex-col w-full max-w-6xl shadow-xl rounded px-2 lg:px-5">
+        <div class="flex gap-2 justify-center p-4 mt-4" data-root="header">
+          <button
+            class="overlay relative shadow-lg hover:shadow-blue-300/50 rounded p-2 w-11 min-h-full transition duration-250 ease-in-out text-slate-300"
+            data-btn="home-header"
+          >
+            <i class="fa-solid fa-house"></i>
+          </button>
 
-            <form class="max-w-sm" data-form="search">
-              <div
-                class="flex overlay hover:shadow-blue-300/50 items-center gap-3 w-full h-12 rounded-lg shadow-lg outline outline-0 outline-offset-2 outline-blue-500 focus-within:outline-2 focus-within:shadow-blue-300/50 overflow-hidden p-3 transition duration-250 ease-in-out"
+          <form class="max-w-sm" data-form="search">
+            <div
+              class="flex overlay hover:shadow-blue-300/50 items-center gap-3 w-full h-12 rounded-lg shadow-lg outline outline-0 outline-offset-2 outline-blue-500 focus-within:outline-2 focus-within:shadow-blue-300/50 overflow-hidden p-3 transition duration-250 ease-in-out"
+            >
+              <button type="button" data-btn="position" class="text-lg text-slate-300">
+                <i class="fa-solid fa-location-crosshairs"></i>
+              </button>
+              <input
+                class="bg-transparent h-full w-full outline-none text-sm text-slate-300 pr-2"
+                autocomplete="off"
+                type="text"
+                name="search-input"
+                id="search-input"
+                placeholder="Weather in..."
+                data-input="search"
+              />
+              <button
+                class="grid place-items-center h-full w-12 text-gray-300 w-fit h-fit"
+                type="submit"
               >
-                <button type="button" data-btn="position" class="text-lg text-slate-300">
-                  <i class="fa-solid fa-location-crosshairs"></i>
-                </button>
-                <input
-                  class="bg-transparent h-full w-full outline-none text-sm text-slate-300 pr-2"
-                  autocomplete="off"
-                  type="text"
-                  name="search-input"
-                  id="search-input"
-                  placeholder="Weather in..."
-                  data-input="search"
-                />
-                <button
-                  class="grid place-items-center h-full w-12 text-gray-300 w-fit h-fit"
-                  type="submit"
-                >
-                  <i class="fa-solid fa-magnifying-glass text-amber-600"></i>
-                </button>
-              </div>
-            </form>
-          </div>
-          <p class="text-slate-300 text-center opacity-0" data-feedback="error">error</p>
+                <i class="fa-solid fa-magnifying-glass text-amber-600"></i>
+              </button>
+            </div>
+          </form>
         </div>
 
         <div class="grid lg:grid-cols-10 w-full h-full">

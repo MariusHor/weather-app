@@ -3,3 +3,4 @@ export { default as EventEmitter } from './EventEmitter';
 export { default as views } from './views/index';
 export { default as Model } from './model/Model';
 export { default as Geolocation } from './model/Geolocation';
+export { default as Api } from './model/Api';

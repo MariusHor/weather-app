@@ -7,12 +7,11 @@ export default class Header {
     this.form = getEl(this.parent, '[data-form="search"]');
     this.positionBtn = getEl(this.parent, '[data-btn="position"]');
     this.homeBtn = getEl(this.parent, '[data-btn="home-header"]');
-    this.errorFeedbackEl = getEl(this.parent, '[data-feedback="error"]');
 
     this.notificationManager = notificationManager;
 
     events.on('setMapQuery', this.render);
-    events.on('setCurrentLocation', this.render);
+    events.on('setCurrentPosition', this.render);
     events.on('setReportView', this.render);
     events.on('setHomeView', this.render);
     events.on('setFavorites', this.#renderNotificationCount);
@@ -26,7 +25,7 @@ export default class Header {
       this.notificationManager.remove(this.homeBtn);
     }
 
-    if (state.hasCurrentLocation) {
+    if (state.hasCurrentPosition) {
       this.#disablePositionBtn();
     }
 
@@ -37,13 +36,15 @@ export default class Header {
     this.positionBtn.addEventListener('click', async () => {
       await callback();
     });
+
     return this;
   }
 
   bindHomeBtnClick = callback => {
-    this.homeBtn.addEventListener('click', () => {
-      callback();
+    this.homeBtn.addEventListener('click', async () => {
+      await callback();
     });
+
     return this;
   };
 
@@ -52,19 +53,8 @@ export default class Header {
       event.preventDefault();
       callback(this.input.value);
     });
+
     return this;
-  };
-
-  renderErrorFeedback = message => {
-    this.errorFeedbackEl.textContent = message;
-    this.errorFeedbackEl.classList.toggle('opacity-0');
-    this.errorFeedbackEl.classList.toggle('opacity-100');
-
-    setTimeout(() => {
-      this.errorFeedbackEl.textContent = '';
-      this.errorFeedbackEl.classList.toggle('opacity-0');
-      this.errorFeedbackEl.classList.toggle('opacity-100');
-    }, 2000);
   };
 
   submitForm = () => {

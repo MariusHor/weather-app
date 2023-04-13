@@ -45,6 +45,7 @@ export const getPositionName = async (req, res, next) => {
       country,
     });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };

@@ -1,16 +1,16 @@
 import L from 'leaflet';
 import { RED } from 'constants';
-import { MapPopup } from 'components';
+import { MapPopup } from 'templates';
 
 import ClusterLayer from './ClusterClayer';
 
 export default class FavoritesLayerBuilder extends ClusterLayer {
   markerIcon;
 
-  createMarker = (location, map) => {
-    const { lat, lon } = location.coords;
-    const { temp } = location.weatherReport[0].main;
-    const weatherIcon = location.weatherReport[0].weather[0].icon;
+  createMarker = (position, map) => {
+    const { lat, lon } = position.coords;
+    const { temp } = position.weatherReport[0].main;
+    const weatherIcon = position.weatherReport[0].weather[0].icon;
     let popupTimeout;
 
     const marker = L.marker([lat, lon], {

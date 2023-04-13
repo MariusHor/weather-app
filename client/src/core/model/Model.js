@@ -1,241 +1,84 @@
-import { fetchSingle } from 'utils/helpers';
-import { API_SERVER_URI } from 'constants';
-
 export default class Model {
-  constructor(events, geolocation) {
+  constructor({ events, geolocation, api }) {
     this.events = events;
     this.geolocation = geolocation;
+    this.api = api;
 
     this.state = {
-      notificationCount: 0,
-      favorites: [],
       currentSearch: {
         coords: null,
         currentWeather: null,
         forecast: null,
       },
+      currentPosition: [],
       history: [],
-      hasCurrentLocation: false,
+      favorites: [],
       activeView: 'home',
       formInputValue: '',
+      notificationCount: 0,
+      hasCurrentPosition: false,
     };
   }
 
-  getCoords = async query => {
-    const url = `${API_SERVER_URI}weatherReport/coords/${query}`;
-
-    try {
-      this.buffer = await fetchSingle(url);
-      return this.buffer;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
-  getWeatherReport = async coords => {
-    const { lat, lon } = coords;
-    const url = `${API_SERVER_URI}weatherReport/report/${lat}&${lon}`;
-
-    try {
-      this.buffer = await fetchSingle(url);
-      return this.buffer;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
-  getPositionName = async coords => {
-    const { lat, lon } = coords;
-    const url = `${API_SERVER_URI}weatherReport/positionName/${lat}&${lon}`;
-
-    try {
-      this.buffer = await fetchSingle(url);
-      return this.buffer;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
-
-  getCurrentLocation = async () => {
-    try {
-      await this.geolocation.checkGelocationPermission();
-
-      const userPosition = await this.geolocation.getUserPosition();
-
-      const { latitude: lat, longitude: lon } = userPosition.coords;
-      const currentLocationName = await this.getPositionName({ lat, lon });
-
-      return {
-        name: currentLocationName,
-        coords: { lat, lon },
-      };
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
-  getLastLocationSearch = () => this.state.history.at(-1).currentWeather.name;
-
-  getState = () => ({
-    ...this.state,
-  });
-
-  getCurrentView = () => this.state.activeView;
-
-  getFavorites = () => this.state.favorites;
-
-  updateFavWeatherReport = async favorites => {
-    try {
-      const updatedFavorites = await Promise.all(
-        favorites.map(async favorite => {
-          const weatherReport = await this.getWeatherReport(favorite.coords);
-          return {
-            ...favorite,
-            weatherReport,
-          };
-        }),
-      );
-
-      this.state = {
-        ...this.state,
-        favorites: updatedFavorites,
-      };
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
-
-  updateCurrLocationWeatherReport = async location => {
-    try {
-      const weatherReport = await this.getWeatherReport(location.coords);
-
-      this.state = {
-        ...this.state,
-        currentLocation: {
-          ...this.state.currentLocation,
-          weatherReport,
-        },
-      };
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
-
-  saveErrorMessage = message => {
-    this.state = {
-      ...this.state,
-      errorMessage: message,
-    };
-  };
-
-  saveFavorite = () => {
-    try {
-      if (this.isFavAlready(this.state.history.at(-1).coords))
-        throw Error('Location already saved');
-
-      const locationName = this.getLastLocationSearch();
-
-      this.state = {
-        ...this.state,
-        favorites: [
-          ...this.state.favorites,
-          {
-            tag: `#${locationName}`,
-            coords: this.state.history.at(-1).coords,
-          },
-        ],
-      };
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-
-    return this;
-  };
-
-  saveCurrentSearch = payload => {
-    this.state = {
-      ...this.state,
-      currentSearch: {
-        ...this.state.currentSearch,
-        ...payload,
-      },
-    };
-
-    return this;
-  };
-
-  saveCurrentLocation = payload => {
-    this.state = {
-      ...this.state,
-      ...payload,
-    };
-
-    return this;
-  };
-
-  saveActiveView(view) {
-    this.state = {
-      ...this.state,
-      activeView: view,
-    };
-
-    return this;
+  get getCoords() {
+    return this.api.getCoords;
   }
 
-  saveInputValue(value) {
-    this.state = {
-      ...this.state,
-      formInputValue: value,
-    };
-
-    return this;
+  get getWeatherReport() {
+    return this.api.getWeatherReport;
   }
 
-  saveHistory = () => {
-    this.state = {
-      ...this.state,
-      history: [...this.state.history, this.state.currentSearch],
-      currentSearch: {
-        coords: null,
-        currentWeather: null,
-        forecast: null,
-      },
-    };
-
-    return this;
-  };
+  get getPositionName() {
+    return this.api.getPositionName;
+  }
 
   dispatchState(event) {
     this.events.emit(event, this.state);
   }
 
-  resetNotificationCount() {
-    this.state = {
-      ...this.state,
-      notificationCount: 0,
-    };
+  setState = callback => {
+    this.state = callback(this.state);
 
     return this;
-  }
+  };
 
-  increaseNotificationCount() {
-    this.state = {
-      ...this.state,
-      notificationCount: this.state.notificationCount + 1,
-    };
+  getState = () => ({
+    ...this.state,
+  });
 
-    return this;
-  }
+  getFavorite = tag => {
+    const currentFavorite = this.state.favorites.find(favorite => favorite.tag === tag);
 
-  isFavAlready = coords =>
-    this.state.favorites.some(
-      fav => fav.coords.lat === coords.lat && fav.coords.lon === coords.lon,
-    );
+    return currentFavorite;
+  };
+
+  getCurrentPosition = async () => {
+    try {
+      const coords = await this.geolocation.getCurrentPositionCoords();
+      const currentPositionName = await this.api.getPositionName(coords);
+
+      return {
+        name: currentPositionName,
+        coords,
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  validateFavorite = coords => {
+    try {
+      const { favorites } = this.state;
+
+      const isFavorite = favorites.some(
+        fav => fav.coords.lat === coords.lat && fav.coords.lon === coords.lon,
+      );
+
+      if (isFavorite) throw Error('Location already saved');
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
 }

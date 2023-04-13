@@ -1,5 +1,5 @@
 import { append, getEl } from 'utils/helpers';
-import { MainDefault, MainReport, MainError, Loader } from 'components';
+import { MainDefault, MainReport, MainError, Loader } from 'templates';
 
 export default class Main {
   constructor(root, events) {
@@ -18,9 +18,13 @@ export default class Main {
     }
 
     if (payload.activeView === 'report') {
-      append(this.parent, MainReport(payload.history.at(-1).currentWeather));
+      const { positionName, currentWeather } = payload.history.at(-1);
+
+      append(this.parent, MainReport(positionName, currentWeather));
       this.#getElements();
-      this.#handleShareButtonClick();
+
+      if (this.shareBtnListeners) this.shareBtnListeners.removeListeners();
+      this.shareBtnListeners = this.#handleShareButtonClick();
     }
 
     if (payload.activeView === 'error') {
@@ -28,23 +32,6 @@ export default class Main {
       this.homeBtn = getEl(this.parent, '[data-btn="home-main"]');
     }
 
-    return this;
-  };
-
-  bindHomeButtonClick = callback => {
-    this.homeBtn.addEventListener('click', callback);
-    return this;
-  };
-
-  bindFavoriteBtnClick = callback => {
-    this.favoriteBtn.addEventListener('click', callback);
-    return this;
-  };
-
-  bindCopyUrlClick = callback => {
-    this.copyUrlBtn.addEventListener('click', () => {
-      callback(this.urlInput.value);
-    });
     return this;
   };
 
@@ -69,17 +56,59 @@ export default class Main {
     append(this.parent, Loader());
   };
 
+  bindHomeButtonClick = callback => {
+    this.homeBtn.addEventListener('click', callback);
+    return this;
+  };
+
+  bindFavoriteBtnClick = callback => {
+    const handleFavBtnCallback = () => {
+      callback();
+    };
+
+    this.favoriteBtn.addEventListener('click', handleFavBtnCallback);
+
+    return {
+      removeListeners: () => {
+        this.favoriteBtn.removeEventListener('click', handleFavBtnCallback);
+      },
+    };
+  };
+
+  bindCopyUrlClick = callback => {
+    const handleCopyUrlCallback = () => {
+      callback(this.urlInput.value);
+    };
+
+    this.copyUrlBtn.addEventListener('click', handleCopyUrlCallback);
+
+    return {
+      removeListeners: () => {
+        this.copyUrlBtn.removeEventListener('click', handleCopyUrlCallback);
+      },
+    };
+  };
+
   #handleShareButtonClick = () => {
-    this.shareBtn.addEventListener('click', () => {
+    const handleShareBtnCallback = () => {
       this.urlInput.value = window.location.href;
       this.popupContainer.classList.toggle('active');
-    });
+    };
 
-    document.addEventListener('click', event => {
+    const documentClickCallback = event => {
       if (event.target.closest('[data-container="shareBtn"]')) return;
       this.popupContainer.classList.remove('active');
-    });
-    return this;
+    };
+
+    this.shareBtn.addEventListener('click', handleShareBtnCallback);
+    document.addEventListener('click', documentClickCallback);
+
+    return {
+      removeListeners: () => {
+        this.shareBtn.removeEventListener('click', handleShareBtnCallback);
+        document.removeEventListener('click', documentClickCallback);
+      },
+    };
   };
 
   #removeLastChild = () => {

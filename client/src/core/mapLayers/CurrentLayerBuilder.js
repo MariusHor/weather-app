@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import { GREEN } from 'constants';
-import { MapPopup } from 'components';
+import { MapPopup } from 'templates';
 import Layer from './Layer';
 
 export default class CurrentLayerbuilder extends Layer {
@@ -10,10 +10,10 @@ export default class CurrentLayerbuilder extends Layer {
 
   popupTimeout;
 
-  createMarker = (location, map) => {
-    const { lat, lon } = location.coords;
-    const { temp } = location.weatherReport[0].main;
-    const weatherIcon = location.weatherReport[0].weather[0].icon;
+  createMarker = (position, map) => {
+    const { lat, lon } = position.coords;
+    const { temp } = position.weatherReport[0].main;
+    const weatherIcon = position.weatherReport[0].weather[0].icon;
 
     this.marker = L.marker([lat, lon], {
       opacity: 0.8,

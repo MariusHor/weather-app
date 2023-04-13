@@ -1,4 +1,4 @@
-import { Model, Geolocation, EventEmitter, Notification, views } from 'core';
+import { Model, Geolocation, Api, EventEmitter, Notification, views } from 'core';
 import App from './App';
 
 import 'styles/main.scss';
@@ -9,7 +9,8 @@ const root = document.querySelector('.app');
 const favNotifications = new Notification();
 const events = new EventEmitter();
 const geolocation = new Geolocation();
-const model = new Model(events, geolocation);
+const api = new Api();
+const model = new Model({ events, geolocation, api });
 
 const appViews = {
   header: new views.Header(root, events, favNotifications),

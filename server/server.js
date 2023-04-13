@@ -13,11 +13,12 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-app.use(errorMiddleware);
 
 // Routes
 app.use("/weatherReport", weatherReportRoute);
 app.use("/tileLayer", tileLayerRoute);
+
+app.use(errorMiddleware);
 
 // Listener
 app.listen(port, () => {

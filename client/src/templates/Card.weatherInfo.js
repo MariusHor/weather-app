@@ -1,25 +1,25 @@
 import { formatTime, round } from 'utils/helpers';
 import SharePopup from './Card.sharePopup';
 
-const WeatherInfoCard = payload => {
-  const weatherIconSrc = `https://openweathermap.org/img/wn/${payload.weather.icon}@2x.png`;
+const WeatherInfoCard = (locationName, weatherData) => {
+  const weatherIconSrc = `https://openweathermap.org/img/wn/${weatherData.weather.icon}@2x.png`;
 
   return `
         <div class="overlay grid flex-col gap-6 w-full h-full shadow-xl rounded-lg text-slate-100 p-5 text-xs w-72 overflow-hidden">  
             <div class="flex justify-between items-center">
                 <div class="flex gap-1 h-fit items-center">
                     <i class="fa-solid fa-location-dot text-blue-300"></i>  
-                    <p class="font-bold leading-none">${payload.location}</p>
+                    <p class="font-bold leading-none">${locationName}</p>
                 </div> 
                 <p class="h-fit">
-                        Today, ${formatTime(payload.currentTime, payload.timezone)}  
+                        Today, ${formatTime(weatherData.currentTime, weatherData.timezone)}  
                 </p>       
             </div>   
             <div class="flex flex-col items-center justify-center">
-                <h1 class="text-8xl">${round(payload.weather.temp)}<span>&#176;</span></h1>
+                <h1 class="text-8xl">${round(weatherData.weather.temp)}<span>&#176;</span></h1>
                 <div class="flex items-center">
                     <img src=${weatherIconSrc} width="60px" height="60px"/>
-                    <p class="text-lg">${payload.weather.description}</p>
+                    <p class="text-lg">${weatherData.weather.description}</p>
                 </div>              
             </div>
             <div class="flex justify-between">

@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import { BLUE } from 'constants';
-import { MapPopupSecondary } from 'components';
+import { MapPopupSecondary } from 'templates';
 import Layer from './Layer';
 
 export default class MapQueryLayerBuilder extends Layer {
@@ -10,8 +10,8 @@ export default class MapQueryLayerBuilder extends Layer {
 
   popupTimeout;
 
-  createMarker = (location, map) => {
-    const { lat, lon } = location.coords;
+  createMarker = (position, map) => {
+    const { lat, lon } = position.coords;
 
     this.marker = L.marker([lat, lon], {
       opacity: 0.8,

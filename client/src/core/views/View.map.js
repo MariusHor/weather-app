@@ -25,7 +25,7 @@ export default class Map {
     this.parent = getEl(root, '[data-root="home"]');
 
     events.on('setHomeView', this.render);
-    events.on('setCurrentLocation', this.#renderCurrentLocation);
+    events.on('setCurrentPosition', this.#renderCurrentPosition);
     events.on('setMapQuery', this.#renderMapQuery);
   }
 
@@ -34,15 +34,17 @@ export default class Map {
   render = state => {
     this.#resetMap().#createMap();
 
-    if (state.hasCurrentLocation) this.#loadLayer(CURRENT, state.currentLocation);
+    if (state.hasCurrentPosition) this.#loadLayer(CURRENT, state.currentPosition);
     if (state.favorites.length) this.#loadLayer(FAVORITES, state.favorites);
   };
 
-  #renderCurrentLocation = state => {
+  #renderCurrentPosition = state => {
     if (this.mapQueryLayerBuilder) this.mapQueryLayerBuilder.resetLayer(this.#map);
 
     this.currentLayerBuilder = new CurrentLayerBuilder();
-    this.#loadLayer(CURRENT, state.currentLocation);
+
+    if (state.activeView !== 'home') return;
+    this.#loadLayer(CURRENT, state.currentPosition);
   };
 
   #renderMapQuery = state => {
@@ -110,14 +112,20 @@ export default class Map {
   };
 
   bindMapClick = callback => {
-    this.#map.on('click', e => {
-      callback(e.latlng);
-    });
+    const handleMapClickCallback = event => {
+      callback(event.latlng);
+    };
 
-    return this;
+    this.#map.on('click', handleMapClickCallback);
+
+    return {
+      removeListeners: () => {
+        this.#map.off('click', handleMapClickCallback);
+      },
+    };
   };
 
-  bindMapQueryGetReport = callback => {
+  bindGetReportBtn = callback => {
     const getReportCallback = event => {
       this.parent.removeEventListener('click', getReportCallback);
 

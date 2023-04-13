@@ -3,7 +3,7 @@ export default class Geolocation {
 
   #position;
 
-  async checkGelocationPermission() {
+  async #checkGelocationPermission() {
     try {
       this.#permission = await navigator.permissions.query({ name: 'geolocation' });
       if (this.#permission.state === 'denied') {
@@ -15,7 +15,7 @@ export default class Geolocation {
     }
   }
 
-  async getUserPosition() {
+  async #getUserPosition() {
     try {
       this.#position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject);
@@ -29,4 +29,19 @@ export default class Geolocation {
       throw error;
     }
   }
+
+  getCurrentPositionCoords = async () => {
+    try {
+      await this.#checkGelocationPermission();
+
+      const userPosition = await this.#getUserPosition();
+
+      const { latitude: lat, longitude: lon } = userPosition.coords;
+
+      return { lat, lon };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
 }

@@ -1,5 +1,5 @@
 import { append, getEl } from 'utils/helpers';
-import { SideDefault, SideForecast } from 'components';
+import { SideDefault, SideForecast } from 'templates';
 
 export default class Sidebar {
   constructor(root, events) {
@@ -12,7 +12,7 @@ export default class Sidebar {
   render = state => {
     this.#removeLastChild();
 
-    if (state.activeView === 'home') {
+    if (state.activeView !== 'report') {
       append(this.parent, SideDefault(state.favorites));
     }
 
@@ -22,23 +22,37 @@ export default class Sidebar {
   };
 
   bindFocusBtnClick = callback => {
-    this.parent.addEventListener('click', event => {
+    const handlefocusBtnCallback = event => {
+      this.parent.removeEventListener('click', handlefocusBtnCallback);
+
       const focusBtn = event.target.closest('[data-button="focus"]');
+
       if (!focusBtn) return;
 
       callback();
-    });
+    };
+
+    this.parent.addEventListener('click', handlefocusBtnCallback);
+
     return this;
   };
 
   bindFavTagClick = callback => {
-    this.parent.addEventListener('click', event => {
+    const handleFavoriteTagCallback = event => {
       const favTagElement = event.target.closest('[data-btn="favorite-tag"]');
       if (!favTagElement) return;
 
       const { tag } = favTagElement.dataset;
       callback(tag);
-    });
+    };
+
+    this.parent.addEventListener('click', handleFavoriteTagCallback);
+
+    return {
+      removeListeners: () => {
+        this.parent.removeEventListener('click', handleFavoriteTagCallback);
+      },
+    };
   };
 
   #removeLastChild = () => {

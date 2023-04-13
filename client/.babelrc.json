@@ -13,13 +13,11 @@
       {
         "alias": {
           "": "./src",
-          "actions": "./src/actions",
           "assets": "./src/assets",
-          "components": "./src/components",
-          "core": "./src/core",
-          "containers": "./src/containers",
           "constants": "./src/constants",
+          "core": "./src/core",
           "styles": "./src/styles",
+          "templates": "./src/templates",
           "utils": "./src/utils"
         }
       }

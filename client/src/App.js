@@ -12,126 +12,214 @@ export default class App {
     this.model = model;
   }
 
-  handleFormSubmit = async input => {
+  #handleFormSubmit = async input => {
     try {
+      window.history.pushState({}, '', `#${input}`);
       this.main.showLoader();
 
       const coords = await this.model.getCoords(input);
+      const positionName = await this.model.getPositionName(coords);
       const weatherReport = await this.model.getWeatherReport(coords);
 
       this.model
-        .saveCurrentSearch({
-          coords,
-          currentWeather: weatherReport[0],
-          forecast: {
-            results: weatherReport[1].list.slice(0, 8),
-            timezone: weatherReport[1].city.timezone,
-          },
-        })
-        .saveActiveView('report')
-        .saveInputValue('')
-        .saveHistory()
+        .setState(prevState => ({
+          ...prevState,
+          formInputValue: '',
+          activeView: 'report',
+          history: [
+            ...prevState.history,
+            {
+              positionName,
+              coords,
+              currentWeather: weatherReport[0],
+              forecast: {
+                results: weatherReport[1].list.slice(0, 8),
+                timezone: weatherReport[1].city.timezone,
+              },
+            },
+          ],
+        }))
         .dispatchState('setReportView');
 
-      this.main
-        .bindFavoriteBtnClick(this.handleFavoriteSubmit)
-        .bindCopyUrlClick(this.handleCopyUrlClick);
-
-      window.history.pushState({}, '', `#${input}`);
+      this.#removeListeners('main').#bindListeners('main');
     } catch (error) {
-      this.renderErrorFeedback(error.message);
+      this.#renderErrorFeedback(error.message);
     }
   };
 
-  handleHomeBtnClick = async () => {
+  #handleFavTagBtnClick = async currentTag => {
+    window.history.pushState({}, '', `${currentTag}`);
+
+    const { coords, tag } = this.model.getFavorite(currentTag);
+    const [locality, country] = tag.slice(1).split(', ');
+    const weatherReport = await this.model.getWeatherReport(coords);
+
+    this.main.showLoader();
+
+    this.model
+      .setState(prevState => ({
+        ...prevState,
+        formInputValue: '',
+        activeView: 'report',
+        history: [
+          ...prevState.history,
+          {
+            positionName: { locality, country },
+            coords,
+            currentWeather: weatherReport[0],
+            forecast: {
+              results: weatherReport[1].list.slice(0, 8),
+              timezone: weatherReport[1].city.timezone,
+            },
+          },
+        ],
+      }))
+      .dispatchState('setReportView');
+
+    this.#removeListeners('main').#bindListeners('main');
+  };
+
+  #handleHomeBtnClick = async () => {
     try {
-      const currentView = this.model.getCurrentView();
-      if (currentView === 'home') return;
-
-      this.main.showLoader();
-
-      const { currentLocation, hasCurrentLocation, favorites } = this.model.state;
-
-      if (favorites.length) await this.model.updateFavWeatherReport(favorites);
-      if (hasCurrentLocation) await this.model.updateCurrLocationWeatherReport(currentLocation);
-
-      this.model
-        .saveActiveView('home')
-        .saveInputValue('')
-        .resetNotificationCount()
-        .dispatchState('setHomeView');
-
-      this.map.bindMapClick(this.handleMapClick);
-      this.side.bindFavTagClick(this.handleFavTagClick);
+      const { activeView } = this.model.getState();
+      if (activeView === 'home') return;
 
       window.history.pushState('', document.title, window.location.pathname);
+      this.main.showLoader();
+
+      await this.#updateFavoritesWeatherReport();
+      await this.#updateCurrentPositionWeatherReport();
+
+      this.model
+        .setState(prevState => ({
+          ...prevState,
+          activeView: 'home',
+          formInputValue: '',
+          notificationCount: 0,
+        }))
+        .dispatchState('setHomeView');
+
+      this.#removeListeners('map', 'side').#bindListeners('map', 'side');
     } catch (error) {
-      this.renderErrorFeedback(error.message);
+      this.#renderErrorFeedback(error.message);
     }
   };
 
-  handlePositionBtnClick = async () => {
+  #updateFavoritesWeatherReport = async () => {
+    const { favorites } = this.model.getState();
+
+    if (favorites.length) {
+      const updatedFavorites = await Promise.all(
+        favorites.map(async favorite => {
+          const weatherReport = await this.model.getWeatherReport(favorite.coords);
+          return {
+            ...favorite,
+            weatherReport,
+          };
+        }),
+      );
+
+      this.model.setState(prevState => ({
+        ...prevState,
+        favorites: updatedFavorites,
+      }));
+    }
+  };
+
+  #updateCurrentPositionWeatherReport = async () => {
+    const { currentPosition, hasCurrentPosition } = this.model.getState();
+
+    if (hasCurrentPosition) {
+      const weatherReport = await this.model.getWeatherReport(currentPosition.coords);
+
+      this.model.setState(prevState => ({
+        ...prevState,
+        currentPosition: {
+          ...prevState.currentPosition,
+          weatherReport,
+        },
+      }));
+    }
+  };
+
+  #handlePositionBtnClick = async () => {
     try {
-      const currentLocation = await this.model.getCurrentLocation();
-      const weatherReport = await this.model.getWeatherReport(currentLocation.coords);
+      const currentPosition = await this.model.getCurrentPosition();
+      const weatherReport = await this.model.getWeatherReport(currentPosition.coords);
 
       this.model
-        .saveCurrentLocation({
-          hasCurrentLocation: true,
-          currentLocation: {
-            ...currentLocation,
+        .setState(prevState => ({
+          ...prevState,
+          formInputValue: `${currentPosition.name.locality}, ${currentPosition.name.country}`,
+          hasCurrentPosition: true,
+          currentPosition: {
+            ...currentPosition,
             weatherReport,
           },
-        })
-        .saveInputValue(`${currentLocation.name.locality}, ${currentLocation.name.country}`)
-        .dispatchState('setCurrentLocation');
+        }))
+        .dispatchState('setCurrentPosition');
     } catch (error) {
-      this.renderErrorFeedback(error.message);
+      this.#renderErrorFeedback(error.message);
     }
   };
 
-  handleMapClick = async coords => {
+  #handleMapClick = async coords => {
     try {
       const { lat, lng: lon } = coords;
-      const locationName = await this.model.getPositionName({ lat, lon });
+      const positionName = await this.model.getPositionName({ lat, lon });
 
       this.model
-        .saveCurrentSearch({ coords: { lat, lon } })
-        .saveInputValue(`${locationName.locality}, ${locationName.country}`)
+        .setState(prevState => ({
+          ...prevState,
+          formInputValue: `${positionName.locality}, ${positionName.country}`,
+          currentSearch: {
+            coords: { lat, lon },
+          },
+        }))
         .dispatchState('setMapQuery');
 
-      this.map.bindMapQueryGetReport(this.handleMapQueryGetReport);
+      this.map.bindGetReportBtn(this.#handleGetReportBtnClick);
     } catch (error) {
-      this.renderErrorFeedback(error.message);
+      this.#renderErrorFeedback(error.message);
     }
   };
 
-  handleFavoriteSubmit = () => {
+  #handleFavoriteSubmit = () => {
     try {
-      const favorites = this.model.getFavorites();
+      const { favorites, history } = this.model.getState();
+      const { positionName, coords } = history.at(-1);
 
       if (favorites.length >= MAX_FAV_COUNT) throw Error('Maximum saved favorites reached');
 
-      this.model.increaseNotificationCount().saveFavorite().dispatchState('setFavorites');
+      this.model.validateFavorite(coords);
+
+      this.model
+        .setState(prevState => ({
+          ...prevState,
+          notificationCount: prevState.notificationCount + 1,
+          favorites: [
+            ...prevState.favorites,
+            {
+              tag: `#${positionName.locality}, ${positionName.country}`,
+              coords,
+            },
+          ],
+        }))
+        .dispatchState('setFavorites');
     } catch (error) {
-      this.renderErrorFeedback(error.message);
+      this.#renderErrorFeedback(error.message);
     }
   };
 
-  handleFavTagClick = tag => {
-    const queryInput = tag.slice(1);
-    this.handleFormSubmit(queryInput);
-  };
-
-  handleFocusBtnClick = () => {
+  #handleFocusBtnClick = () => {
     this.header.focusSearchInput();
   };
 
-  handleMapQueryGetReport = () => {
+  #handleGetReportBtnClick = () => {
     this.header.submitForm();
   };
 
-  handleCopyUrlClick = copyText => {
+  #handleCopyUrlBtnClick = copyText => {
     navigator.clipboard.writeText(copyText).then(
       () => {
         this.main.showCopyFeedback('success');
@@ -142,39 +230,92 @@ export default class App {
     );
   };
 
-  renderPageFromHash = async () => {
+  #renderPageFromHash = async () => {
     const hash = window.location.hash.substring(1);
     if (hash) {
-      await this.handleFormSubmit(hash);
+      await this.#handleFormSubmit(hash);
     }
   };
 
-  renderErrorFeedback = message => {
-    this.model.saveActiveView('error').saveErrorMessage(message);
+  #renderErrorFeedback = message => {
+    this.model.setState(prevState => ({
+      ...prevState,
+      formInputValue: ` `,
+      errorMessage: message,
+      activeView: 'error',
+    }));
+
     const state = this.model.getState();
 
-    this.main.render(state).bindHomeButtonClick(this.handleHomeBtnClick);
+    this.header.render(state);
+    this.main.render(state).bindHomeButtonClick(this.#handleHomeBtnClick);
+    this.side.render(state);
+
+    this.#removeListeners('side').#bindListeners('side');
   };
 
-  initListeners = activeView => {
-    this.header
-      .bindPositionBtnClick(this.handlePositionBtnClick)
-      .bindFormSubmit(this.handleFormSubmit)
-      .bindHomeBtnClick(this.handleHomeBtnClick);
+  #removeListeners = (...views) => {
+    views.forEach(view => {
+      switch (view) {
+        case 'main':
+          if (!this.favBtnClickListener) return;
+          this.favBtnClickListener.removeListeners();
+          if (!this.copyUrlClickListener) return;
+          this.copyUrlClickListener.removeListeners();
+          break;
+        case 'side':
+          if (!this.favTagClickListener) return;
+          this.favTagClickListener.removeListeners();
+          break;
+        case 'map':
+          if (!this.mapClickListener) return;
+          this.mapClickListener.removeListeners();
+          break;
+        default:
+          throw new Error(`Unsupported view: ${view}`);
+      }
+    });
 
-    this.side.bindFocusBtnClick(this.handleFocusBtnClick);
+    return this;
+  };
+
+  #bindListeners = (...views) => {
+    views.forEach(view => {
+      switch (view) {
+        case 'main':
+          this.favBtnClickListener = this.main.bindFavoriteBtnClick(this.#handleFavoriteSubmit);
+          this.copyUrlClickListener = this.main.bindCopyUrlClick(this.#handleCopyUrlBtnClick);
+          break;
+        case 'side':
+          this.favTagClickListener = this.side.bindFavTagClick(this.#handleFavTagBtnClick);
+          break;
+        case 'map':
+          this.mapClickListener = this.map.bindMapClick(this.#handleMapClick);
+          break;
+        default:
+          throw new Error(`Unsupported view: ${view}`);
+      }
+    });
+  };
+
+  #initListeners = activeView => {
+    this.header
+      .bindPositionBtnClick(this.#handlePositionBtnClick)
+      .bindFormSubmit(this.#handleFormSubmit)
+      .bindHomeBtnClick(this.#handleHomeBtnClick);
+
+    this.side.bindFocusBtnClick(this.#handleFocusBtnClick);
 
     if (activeView === 'report') {
-      this.main
-        .bindFavoriteBtnClick(this.handleFavoriteSubmit)
-        .bindCopyUrlClick(this.handleCopyUrlClick);
+      this.main.bindFavoriteBtnClick(this.#handleFavoriteSubmit);
+      this.main.bindCopyUrlClick(this.#handleCopyUrlBtnClick);
     }
 
-    if (activeView === 'home') this.map.bindMapClick(this.handleMapClick);
+    if (activeView === 'home') this.map.bindMapClick(this.#handleMapClick);
   };
 
   mount = async () => {
-    await this.renderPageFromHash();
+    await this.#renderPageFromHash();
 
     const state = this.model.getState();
 
@@ -185,6 +326,6 @@ export default class App {
 
     if (state.activeView === 'home') this.map.render(state);
 
-    this.initListeners(state.activeView);
+    this.#initListeners(state.activeView);
   };
 }
