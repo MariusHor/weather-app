@@ -1,7 +1,7 @@
 import express from "express";
-const router = express.Router();
-import { getTileLayerUrl } from "../controllers/controller.tileLayer.js";
+import { getTileLayerUrl } from "#controllers";
 
+const router = express.Router();
 router.route("/").get(getTileLayerUrl);
 
 export default router;

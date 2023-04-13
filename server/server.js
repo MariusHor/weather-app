@@ -1,22 +1,25 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import WeatherReportRoute from "./src/routes/route.weatherReport.js";
-import TileLayerRoute from "./src/routes/route.tileLayer.js";
-import { errorMiddleware } from "./src/middlewares/errorMiddleware.js";
+import { weatherReportRoute, tileLayerRoute } from "#routes";
+import { errorMiddleware } from "#middlewares";
 
+// App config
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-
-app.use("/weatherReport", WeatherReportRoute);
-app.use("/tileLayer", TileLayerRoute);
 app.use(errorMiddleware);
 
+// Routes
+app.use("/weatherReport", weatherReportRoute);
+app.use("/tileLayer", tileLayerRoute);
+
+// Listener
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });

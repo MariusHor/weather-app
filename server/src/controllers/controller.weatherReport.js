@@ -1,4 +1,4 @@
-import { fetchWeatherAPI, fetchWeatherAPIMultiple } from "../utils/helpers.js";
+import { fetchWeatherAPI, fetchWeatherAPIMultiple } from "#utils";
 
 export const getCoordinates = async (req, res, next) => {
   const { query } = req.params;
