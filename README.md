@@ -17,7 +17,7 @@
 
 ### Screenshot
 
-![](./src/assets/live-site-screenshot.png)
+![](./client/src/assets/live-site-screenshot.png)
 
 ### Links
 
