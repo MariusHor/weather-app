@@ -1,0 +1,23 @@
+@use '../abstracts' as *;
+
+.map-wrapper {
+  max-height: 500px;
+  max-width: 500px;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: $text-clr-main;
+}
+
+.leaflet-control-container {
+  position: absolute;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: $map-popup-clr;
+  color: $text-clr-main;
+}
+
+.leaflet-popup-tip {
+  background-color: $map-popup-clr;
+}

@@ -23,11 +23,11 @@ const MainReport = (location, currentWeather) => {
               ${WeatherInfoCard(locationName, weatherReport)}
           </div>
           <div class="flex flex-col items-center gap-2 h-full w-full rounded-lg text-slate-200 font-bold text-lg">
-              ${SunInfoCard('sunrise', {
+              ${SunInfoCard('sunrise-card', {
                 seconds: currentWeather.sys.sunrise,
                 timezone: currentWeather.timezone,
               })}
-              ${SunInfoCard('sunset', {
+              ${SunInfoCard('sunset-card', {
                 seconds: currentWeather.sys.sunset,
                 timezone: currentWeather.timezone,
               })}

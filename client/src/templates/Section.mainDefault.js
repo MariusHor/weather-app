@@ -1,6 +1,6 @@
 const MainDefault = () => `
-        <div class="map-container h-full flex items-center overflow-hidden">
-            <div id="map" class="map overflow-hidden shadow-md rounded" data-root="map">
+        <div class="map-wrapper rounded-lg overflow-hidden w-full h-full flex items-center shadow-md">
+            <div id="map" class="map bg-sky-500/10 w-full h-full" data-root="map">
             </div>
         </div>
     `;

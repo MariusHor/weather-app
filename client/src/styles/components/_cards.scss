@@ -1,0 +1,21 @@
+@use '../abstracts' as *;
+
+.sunrise-card {
+  background-image: url('../assets/sunrise.jpg');
+  background-size: cover;
+}
+
+.sunset-card {
+  background: url('../assets/sunset.jpg') no-repeat;
+  background-size: cover;
+}
+
+.sunrise-card,
+.sunset-card {
+  min-height: 140px;
+  max-width: 250px;
+}
+
+.favorite-card {
+  box-shadow: $fav-card-box-shadow;
+}

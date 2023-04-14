@@ -1,0 +1,23 @@
+@use '../abstracts' as *;
+
+.share-link-popup {
+  &.active {
+    opacity: 1;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-top: solid 12px white;
+    border-left: solid 12px transparent;
+    border-right: solid 12px transparent;
+  }
+
+  input {
+    font-size: 12px;
+  }
+}

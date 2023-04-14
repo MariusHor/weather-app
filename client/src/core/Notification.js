@@ -3,7 +3,17 @@ export default class Notification {
 
   #createElement(container) {
     this.#notificationElement = document.createElement('span');
-    this.#notificationElement.classList.add('notification');
+    this.#notificationElement.classList.add(
+      'notification',
+      'absolute',
+      'top-0',
+      'right-0',
+      'text-slate-200',
+      'bg-red-600',
+      'text-sm',
+      'p-1.5',
+      'rounded-full',
+    );
     container.appendChild(this.#notificationElement);
   }
 
