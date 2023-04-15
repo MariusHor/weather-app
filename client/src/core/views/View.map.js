@@ -32,10 +32,18 @@ export default class Map {
   #map;
 
   render = state => {
-    this.#resetMap().#createMap();
+    this.#createMap();
 
     if (state.hasCurrentPosition) this.#loadLayer(CURRENT, state.currentPosition);
     if (state.favorites.length) this.#loadLayer(FAVORITES, state.favorites);
+  };
+
+  resetMap = () => {
+    if (this.#map) {
+      this.#map.remove();
+      this.#map = null;
+    }
+    return this;
   };
 
   #renderCurrentPosition = state => {
@@ -87,11 +95,6 @@ export default class Map {
 
     return this;
   }
-
-  #resetMap = () => {
-    if (this.#map) this.#map = null;
-    return this;
-  };
 
   #createTileLayer = async () => {
     const url = `${API_SERVER_URI}tileLayer`;

@@ -16,6 +16,7 @@ export default class App {
     try {
       window.history.pushState({}, '', `#${input}`);
       this.main.showLoader();
+      this.map.resetMap();
 
       const coords = await this.model.getCoords(input);
       const positionName = await this.model.getPositionName(coords);
