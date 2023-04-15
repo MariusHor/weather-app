@@ -8,8 +8,8 @@
   - [Links](#links)
 - [My process](#my-process)
   - [Built with](#built-with)
-  - [What I learned](#what-i-learned)
-  - [Continued development](#continued-development)
+  - [Implementation](#implementation)
+  - [Known issues](#known-issues)
   - [Useful resources](#useful-resources)
 - [Author](#author)
 
@@ -63,6 +63,10 @@ Weather data is retrieved from the OpenWeatherMap API, and the map tiles are obt
 Users can favorite up to 8 locations and they can also copy and share the current report url. This feature was implemented using window.location and window.history. Whenever the report view gets activated by a user search or map click, the URL gets updated with the correct path. If an error occurs, the app displays an error view, allowing the user to receive information and return to the home view, where they can start searching for a new location and get a new weather report.
 
 For the deployment of the app I have used Netlify for the client side and Render for the server side.
+
+### Known issues
+
+A pretty big issue with this project is the fact that as I am dynamically switching between views, I am basically removing certain DOM nodes and inserting other ones constantly so it is very important to remember to remove listeners and to not leave references to the removed nodes inside the app. As of right now the app might present certain memory leaks because of this exact issue so I want to note and remember to either try to rewrite parts of this app hoping that I can solve the problem or I will ever tackle a similar project in Javascript in the future to make sure that I implement things correctly and that I test for memory leaks from the start.
 
 ### Useful resources
 
