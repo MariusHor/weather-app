@@ -66,7 +66,7 @@ For the deployment of the app I have used Netlify for the client side and Render
 
 ### Known issues
 
-A pretty big issue with this project is the fact that as I am dynamically switching between views, I am basically removing certain DOM nodes and inserting other ones constantly so it is very important to remember to remove listeners and to not leave references to the removed nodes inside the app. As of right now the app might present certain memory leaks because of this exact issue so I want to note and remember to either try to rewrite parts of this app hoping that I can solve the problem or I will ever tackle a similar project in Javascript in the future to make sure that I implement things correctly and that I test for memory leaks from the start.
+A pretty big issue with this project is the fact that as I am dynamically switching between views, I am basically removing certain DOM nodes and inserting other ones so it is very important to remember to remove listeners and not to leave references to the removed nodes inside the app. As of right now the app might present certain memory leaks because of this exact issue so I want to note and remember to either try and rewrite parts of this app so that I can solve the problem or if I will ever tackle a similar project in Javascript to make sure that I test for memory leaks from the start. This will ensure that I can catch bugs early on so that fixing them will be easier.
 
 ### Useful resources
 
