@@ -64,9 +64,9 @@ Users can favorite up to 8 locations and they can also copy and share the curren
 
 For the deployment of the app I have used Netlify for the client side and Render for the server side.
 
-### Known issues
+### Further project development
 
-A pretty big issue with this project is the fact that as I am dynamically switching between views, I am basically removing certain DOM nodes and inserting other ones so it is very important to remember to remove listeners and not to leave references to the removed nodes inside the app. As of right now the app might present certain memory leaks because of this exact issue so I want to note and remember to either try and rewrite parts of this app so that I can solve the problem or if I will ever tackle a similar project in Javascript to make sure that I test for memory leaks from the start. This will ensure that I can catch bugs early on so that fixing them will be easier.
+One important feature that this project is missing is page routing because as of right now views are being switched by simply replacing the old view with the new one but this is definitely not a good solution for various reasons such as SEO performance among others. Therefore I would like to further develop this project by implementing the use of a routing library to effectively handle page routing.
 
 ### Useful resources
 
