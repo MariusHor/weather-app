@@ -66,7 +66,7 @@ For the deployment of the app I have used Netlify for the client side and Render
 
 ### Further project development
 
-One important feature that this project is missing is page routing because as of right now views are being switched by simply replacing the old view with the new one but this is definitely not a good solution for various reasons such as SEO performance among others. Therefore I would like to further develop this project by implementing the use of a routing library to effectively handle page routing.
+One important feature that is missing is a solid page routing solution so I would like to implement the use of some tried and tested routing library for this project in the future.
 
 ### Useful resources
 
