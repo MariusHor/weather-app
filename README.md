@@ -21,7 +21,7 @@
 
 ### Links
 
-- [Live Site Demo](https://weather-app-javascript-mariushor.netlify.app/)
+- [Live Site Demo](https://weather-app-mariushor.netlify.app/)
 - [Code Repository](https://github.com/MariusHor/weather-app)
 
 ### Features
